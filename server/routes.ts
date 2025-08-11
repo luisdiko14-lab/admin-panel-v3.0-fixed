@@ -115,7 +115,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Check if user has permission to change ranks
       const executor = await storage.getUser(executorId);
-      if (!executor || executor.rankScore < 4.5) {
+      if (!executor || !executor.rankScore || executor.rankScore < 4.5) {
         return res.status(403).json({ message: "Insufficient permissions" });
       }
 
@@ -166,7 +166,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Check if user has admin permissions
       const executor = await storage.getUser(executorId);
-      if (!executor || executor.rankScore < 4) {
+      if (!executor || !executor.rankScore || executor.rankScore < 4) {
         return res.status(403).json({ message: "Insufficient permissions" });
       }
 
