@@ -53,9 +53,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
   app.get("/api/auth/user", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.discordId;
       const user = await storage.getUser(userId);
-      res.json(user);
+      
+      if (user) {
+        res.json({
+          ...user,
+          robloxUsername: req.user.robloxUsername,
+          discordUsername: req.user.username
+        });
+      } else {
+        // Create user if doesn't exist
+        const newUser = await storage.upsertUser({
+          id: userId,
+          email: req.user.email,
+          firstName: req.user.username,
+          lastName: "",
+          profileImageUrl: req.user.avatar ? `https://cdn.discordapp.com/avatars/${req.user.discordId}/${req.user.avatar}.png` : null,
+        });
+        
+        res.json({
+          ...newUser,
+          robloxUsername: req.user.robloxUsername,
+          discordUsername: req.user.username
+        });
+      }
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
@@ -89,7 +111,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { userId } = req.params;
       const { rankScore, rankName } = req.body;
-      const executorId = req.user.claims.sub;
+      const executorId = req.user.discordId;
 
       // Check if user has permission to change ranks
       const executor = await storage.getUser(executorId);
@@ -140,7 +162,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/admin/command", isAuthenticated, async (req: any, res) => {
     try {
       const { command, targetUser } = req.body;
-      const executorId = req.user.claims.sub;
+      const executorId = req.user.discordId;
 
       // Check if user has admin permissions
       const executor = await storage.getUser(executorId);

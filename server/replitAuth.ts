@@ -31,26 +31,39 @@ export function getSession() {
   });
 }
 
-function updateUserSession(
-  user: any,
-  tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers
-) {
-  user.claims = tokens.claims();
-  user.access_token = tokens.access_token;
-  user.refresh_token = tokens.refresh_token;
-  user.expires_at = user.claims?.exp;
+function updateUserSession(user: any, profile: any) {
+  user.discordId = profile.id;
+  user.username = profile.username;
+  user.email = profile.email;
+  user.avatar = profile.avatar;
+  user.connections = profile.connections || [];
 }
 
-async function upsertUser(
-  claims: any,
-) {
+async function upsertUser(profile: any) {
   await storage.upsertUser({
-    id: claims["sub"],
-    email: claims["email"],
-    firstName: claims["first_name"],
-    lastName: claims["last_name"],
-    profileImageUrl: claims["profile_image_url"],
+    id: profile.id,
+    email: profile.email,
+    firstName: profile.username, // Discord doesn't have separate first/last names
+    lastName: "",
+    profileImageUrl: profile.avatar ? `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.png` : null,
   });
+}
+
+// Check if user has valid Roblox connection
+function hasValidRobloxConnection(connections: any[]): string | null {
+  if (!connections) return null;
+  
+  const robloxConnection = connections.find((conn: any) => conn.type === 'roblox');
+  if (!robloxConnection) return null;
+  
+  const robloxUsername = robloxConnection.name;
+  const allowedUsers = ['Luisdiko87', 'yaniselpror'];
+  
+  if (allowedUsers.includes(robloxUsername)) {
+    return robloxUsername;
+  }
+  
+  return null;
 }
 
 export async function setupAuth(app: Express) {
@@ -59,86 +72,100 @@ export async function setupAuth(app: Express) {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  const config = await getOidcConfig();
+  // Discord OAuth Strategy
+  passport.use(new DiscordStrategy({
+    clientID: process.env.DISCORD_CLIENT_ID!,
+    clientSecret: process.env.DISCORD_CLIENT_SECRET!,
+    callbackURL: "/api/callback",
+    scope: ['identify', 'email', 'connections']
+  },
+  async (accessToken: string, refreshToken: string, profile: any, done: any) => {
+    try {
+      // Check if user has valid Roblox connection
+      const robloxUsername = hasValidRobloxConnection(profile.connections);
+      
+      if (!robloxUsername) {
+        return done(new Error('Access denied: Invalid Roblox connection. Must be Luisdiko87 or yaniselpror'), null);
+      }
 
-  const verify: VerifyFunction = async (
-    tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
-    verified: passport.AuthenticateCallback
-  ) => {
-    const user = {};
-    updateUserSession(user, tokens);
-    await upsertUser(tokens.claims());
-    verified(null, user);
-  };
+      // Create user object with Discord profile and Roblox verification
+      const user = {
+        discordId: profile.id,
+        username: profile.username,
+        email: profile.email,
+        avatar: profile.avatar,
+        robloxUsername: robloxUsername,
+        accessToken: accessToken,
+        refreshToken: refreshToken
+      };
 
-  for (const domain of process.env
-    .REPLIT_DOMAINS!.split(",")) {
-    const strategy = new Strategy(
-      {
-        name: `replitauth:${domain}`,
-        config,
-        scope: "openid email profile offline_access",
-        callbackURL: `https://${domain}/api/callback`,
-      },
-      verify,
-    );
-    passport.use(strategy);
-  }
+      // Upsert user in database
+      await upsertUser(profile);
 
-  passport.serializeUser((user: Express.User, cb) => cb(null, user));
-  passport.deserializeUser((user: Express.User, cb) => cb(null, user));
+      return done(null, user);
+    } catch (error) {
+      console.error('Discord auth error:', error);
+      return done(error, null);
+    }
+  }));
 
-  app.get("/api/login", (req, res, next) => {
-    passport.authenticate(`replitauth:${req.hostname}`, {
-      prompt: "login consent",
-      scope: ["openid", "email", "profile", "offline_access"],
-    })(req, res, next);
+  passport.serializeUser((user: any, done) => {
+    done(null, user);
   });
 
-  app.get("/api/callback", (req, res, next) => {
-    passport.authenticate(`replitauth:${req.hostname}`, {
-      successReturnToOrRedirect: "/",
-      failureRedirect: "/api/login",
-    })(req, res, next);
+  passport.deserializeUser((user: any, done) => {
+    done(null, user);
   });
+
+  // Auth routes
+  app.get("/api/login", passport.authenticate('discord', { 
+    scope: ['identify', 'email', 'connections'] 
+  }));
+
+  app.get("/api/callback", 
+    passport.authenticate('discord', { failureRedirect: '/login-failed' }),
+    (req, res) => {
+      // Successful authentication
+      res.redirect('/');
+    }
+  );
 
   app.get("/api/logout", (req, res) => {
-    req.logout(() => {
-      res.redirect(
-        client.buildEndSessionUrl(config, {
-          client_id: process.env.REPL_ID!,
-          post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
-        }).href
-      );
+    req.logout((err) => {
+      if (err) {
+        console.error('Logout error:', err);
+      }
+      res.redirect('/');
     });
+  });
+
+  // Login failed page
+  app.get("/login-failed", (req, res) => {
+    res.status(403).send(`
+      <html>
+        <head><title>Access Denied</title></head>
+        <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+          <h1>Access Denied</h1>
+          <p>You must have a verified Roblox account connected to Discord.</p>
+          <p>Only users <strong>Luisdiko87</strong> or <strong>yaniselpror</strong> are authorized.</p>
+          <a href="/api/login" style="background: #7289da; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Try Again</a>
+        </body>
+      </html>
+    `);
   });
 }
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
-  const user = req.user as any;
-
-  if (!req.isAuthenticated() || !user.expires_at) {
+  if (!req.isAuthenticated() || !req.user) {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
-  const now = Math.floor(Date.now() / 1000);
-  if (now <= user.expires_at) {
-    return next();
+  const user = req.user as any;
+  
+  // Check if user has valid Roblox connection
+  if (!user.robloxUsername || !['Luisdiko87', 'yaniselpror'].includes(user.robloxUsername)) {
+    return res.status(401).json({ message: "Unauthorized - Invalid Roblox connection" });
   }
 
-  const refreshToken = user.refresh_token;
-  if (!refreshToken) {
-    res.status(401).json({ message: "Unauthorized" });
-    return;
-  }
-
-  try {
-    const config = await getOidcConfig();
-    const tokenResponse = await client.refreshTokenGrant(config, refreshToken);
-    updateUserSession(user, tokenResponse);
-    return next();
-  } catch (error) {
-    res.status(401).json({ message: "Unauthorized" });
-    return;
-  }
+  return next();
 };
