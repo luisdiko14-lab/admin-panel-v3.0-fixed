@@ -53,31 +53,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
   app.get("/api/auth/user", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.discordId;
+      const userId = req.user.discordId || req.user.id;
       const user = await storage.getUser(userId);
       
-      if (user) {
-        res.json({
-          ...user,
-          robloxUsername: req.user.robloxUsername,
-          discordUsername: req.user.username
-        });
-      } else {
-        // Create user if doesn't exist
-        const newUser = await storage.upsertUser({
-          id: userId,
-          email: req.user.email,
-          firstName: req.user.username,
-          lastName: "",
-          profileImageUrl: req.user.avatar ? `https://cdn.discordapp.com/avatars/${req.user.discordId}/${req.user.avatar}.png` : null,
-        });
-        
-        res.json({
-          ...newUser,
-          robloxUsername: req.user.robloxUsername,
-          discordUsername: req.user.username
-        });
-      }
+      // Return user with all session data including guilds
+      const responseUser = {
+        id: userId,
+        username: req.user.username,
+        email: req.user.email,
+        robloxUsername: req.user.robloxUsername,
+        discordUsername: req.user.username,
+        avatar: req.user.avatar,
+        rank: req.user.rank || '41 | Supreme Creator',
+        rankScore: req.user.rankScore || 5,
+        guilds: req.user.guilds || [],
+        isManualLogin: req.user.isManualLogin || false,
+        profileImageUrl: req.user.avatar ? `https://cdn.discordapp.com/avatars/${req.user.discordId}/${req.user.avatar}.png` : null,
+      };
+      
+      res.json(responseUser);
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });

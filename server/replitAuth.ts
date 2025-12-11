@@ -62,7 +62,10 @@ export async function setupAuth(app: Express) {
             robloxUsername: 'Luisdiko87',
             isManualLogin: true,
             avatar: null,
-            email: 'admin@wartycoon.com'
+            email: 'admin@wartycoon.com',
+            rank: '41 | Supreme Creator',
+            rankScore: 5,
+            guilds: []
           };
           return done(null, user);
         }
@@ -79,7 +82,7 @@ export async function setupAuth(app: Express) {
       clientID: process.env.DISCORD_CLIENT_ID!,
       clientSecret: process.env.DISCORD_CLIENT_SECRET!,
       callbackURL: "https://a9e4c766-9f5b-46cf-b780-91441f0b37ee-00-1uenaf0z3nyh5.worf.replit.dev/api/callback",
-      scope: ['identify', 'email', 'connections']
+      scope: ['identify', 'email', 'connections', 'guilds']
     },
     async (accessToken: string, refreshToken: string, profile: any, done: any) => {
       try {
@@ -96,7 +99,10 @@ export async function setupAuth(app: Express) {
           avatar: profile.avatar,
           robloxUsername: robloxUsername,
           accessToken: accessToken,
-          refreshToken: refreshToken
+          refreshToken: refreshToken,
+          rank: '41 | Supreme Creator',
+          rankScore: 5,
+          guilds: profile.guilds || []
         };
 
         return done(null, user);
@@ -139,7 +145,7 @@ export async function setupAuth(app: Express) {
       return res.redirect('/');
     }
     passport.authenticate('discord', { 
-      scope: ['identify', 'email', 'connections'] 
+      scope: ['identify', 'email', 'connections', 'guilds'] 
     })(req, res, next);
   });
 

@@ -1,4 +1,6 @@
 import { cn } from "@/lib/utils";
+import { Link } from "wouter";
+import { Server } from "lucide-react";
 
 interface SidebarProps {
   activeTab: string;
@@ -23,6 +25,7 @@ export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
           <button
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
+            data-testid={`sidebar-tab-${tab.id}`}
             className={cn(
               "w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors",
               activeTab === tab.id
@@ -34,6 +37,18 @@ export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
             <span>{tab.label}</span>
           </button>
         ))}
+        
+        <div className="pt-4 mt-4 border-t border-gray-700">
+          <Link href="/servers">
+            <button
+              data-testid="sidebar-link-servers"
+              className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors hover:bg-indigo-600/20 text-indigo-400"
+            >
+              <Server className="w-4 h-4" />
+              <span>Discord Servers</span>
+            </button>
+          </Link>
+        </div>
       </div>
     </div>
   );
