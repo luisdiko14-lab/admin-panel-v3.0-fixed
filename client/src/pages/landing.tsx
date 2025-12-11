@@ -1,13 +1,59 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { motion } from "framer-motion";
-import { Shield, Users, Terminal, Map, Crown, Zap, Lock, Sword, Target, Star } from "lucide-react";
+import { Shield, Users, Terminal, Map, Crown, Zap, Lock, Sword, Target, Star, User, Key } from "lucide-react";
 import { SiDiscord, SiRobloxstudio } from "react-icons/si";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function Landing() {
-  const handleLogin = () => {
+  const [showManualLogin, setShowManualLogin] = useState(false);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+
+  const handleDiscordLogin = () => {
     window.location.href = "/api/login";
+  };
+
+  const handleManualLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    try {
+      const response = await fetch("/api/manual-login", {
+        method: "POST",
+        body: JSON.stringify({ username, password }),
+        headers: { "Content-Type": "application/json" }
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Login failed");
+      }
+      
+      const data = await response.json();
+      
+      toast({
+        title: "Login Successful",
+        description: `Welcome back, ${data.user.username}!`,
+      });
+      
+      window.location.href = "/";
+    } catch (error: any) {
+      toast({
+        title: "Login Failed",
+        description: error.message || "Invalid username or password",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -70,47 +116,138 @@ export default function Landing() {
               </div>
             </motion.div>
 
-            <motion.div 
-              className="mb-6 bg-gray-800/50 rounded-xl p-5 border border-gray-700/50"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4 }}
-            >
-              <h3 className="text-sm font-semibold text-white mb-3 flex items-center justify-center gap-2">
-                <SiDiscord className="text-indigo-400 w-5 h-5" />
-                Discord Authentication Required
-                <Lock className="w-4 h-4 text-gray-500" />
-              </h3>
-              <div className="text-sm text-gray-300 space-y-2">
-                <div className="flex items-center justify-center gap-2">
-                  <Zap className="w-4 h-4 text-yellow-400" />
-                  <span>Must have Roblox account linked to Discord</span>
-                </div>
-                <div className="flex items-start justify-center gap-2">
-                  <Star className="w-4 h-4 text-amber-400 mt-0.5" />
-                  <span>Authorized: 
-                    <span className="text-amber-400 font-mono mx-1">Luisdiko87</span>
-                    <span className="text-amber-400 font-mono mx-1">yaniselpror</span>
-                    <span className="text-amber-400 font-mono mx-1">AltAccountLuis212</span>
-                  </span>
-                </div>
-              </div>
-            </motion.div>
+            {!showManualLogin ? (
+              <>
+                <motion.div 
+                  className="mb-6 bg-gray-800/50 rounded-xl p-5 border border-gray-700/50"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.4 }}
+                >
+                  <h3 className="text-sm font-semibold text-white mb-3 flex items-center justify-center gap-2">
+                    <SiDiscord className="text-indigo-400 w-5 h-5" />
+                    Discord Authentication
+                    <Lock className="w-4 h-4 text-gray-500" />
+                  </h3>
+                  <div className="text-sm text-gray-300 space-y-2">
+                    <div className="flex items-center justify-center gap-2">
+                      <Zap className="w-4 h-4 text-yellow-400" />
+                      <span>Must have Roblox account linked to Discord</span>
+                    </div>
+                    <div className="flex items-start justify-center gap-2">
+                      <Star className="w-4 h-4 text-amber-400 mt-0.5" />
+                      <span>Authorized: 
+                        <span className="text-amber-400 font-mono mx-1">Luisdiko87</span>
+                        <span className="text-amber-400 font-mono mx-1">yaniselpror</span>
+                        <span className="text-amber-400 font-mono mx-1">AltAccountLuis212</span>
+                      </span>
+                    </div>
+                  </div>
+                </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-            >
-              <Button 
-                onClick={handleLogin}
-                data-testid="button-login-discord"
-                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white py-6 text-lg font-semibold shadow-lg shadow-indigo-500/30 transition-all hover:shadow-indigo-500/50 hover:scale-[1.02]"
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                  className="space-y-3"
+                >
+                  <Button 
+                    onClick={handleDiscordLogin}
+                    data-testid="button-login-discord"
+                    className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white py-6 text-lg font-semibold shadow-lg shadow-indigo-500/30 transition-all hover:shadow-indigo-500/50 hover:scale-[1.02]"
+                  >
+                    <SiDiscord className="mr-3 w-6 h-6" />
+                    Login with Discord
+                  </Button>
+                  
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t border-gray-700" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-gray-900 px-2 text-gray-500">or</span>
+                    </div>
+                  </div>
+                  
+                  <Button 
+                    onClick={() => setShowManualLogin(true)}
+                    data-testid="button-show-manual-login"
+                    variant="outline"
+                    className="w-full border-amber-500/50 text-amber-400 hover:bg-amber-500/10 py-5"
+                  >
+                    <Key className="mr-2 w-5 h-5" />
+                    Admin Login
+                  </Button>
+                </motion.div>
+              </>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="space-y-4"
               >
-                <SiDiscord className="mr-3 w-6 h-6" />
-                Login with Discord
-              </Button>
-            </motion.div>
+                <div className="bg-gray-800/50 rounded-xl p-5 border border-amber-500/30">
+                  <h3 className="text-sm font-semibold text-white mb-4 flex items-center justify-center gap-2">
+                    <Key className="text-amber-400 w-5 h-5" />
+                    Admin Login
+                  </h3>
+                  
+                  <form onSubmit={handleManualLogin} className="space-y-4">
+                    <div className="space-y-2 text-left">
+                      <Label htmlFor="username" className="text-gray-300 flex items-center gap-2">
+                        <User className="w-4 h-4" />
+                        Username
+                      </Label>
+                      <Input
+                        id="username"
+                        type="text"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        placeholder="Enter admin username"
+                        data-testid="input-username"
+                        className="bg-gray-900/50 border-gray-700 text-white placeholder:text-gray-500"
+                        required
+                      />
+                    </div>
+                    
+                    <div className="space-y-2 text-left">
+                      <Label htmlFor="password" className="text-gray-300 flex items-center gap-2">
+                        <Lock className="w-4 h-4" />
+                        Password
+                      </Label>
+                      <Input
+                        id="password"
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Enter password"
+                        data-testid="input-password"
+                        className="bg-gray-900/50 border-gray-700 text-white placeholder:text-gray-500"
+                        required
+                      />
+                    </div>
+                    
+                    <Button 
+                      type="submit"
+                      disabled={isLoading}
+                      data-testid="button-manual-login"
+                      className="w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white py-5 font-semibold"
+                    >
+                      {isLoading ? "Logging in..." : "Login"}
+                    </Button>
+                  </form>
+                </div>
+                
+                <Button 
+                  onClick={() => setShowManualLogin(false)}
+                  variant="ghost"
+                  className="text-gray-400 hover:text-white"
+                  data-testid="button-back-to-discord"
+                >
+                  Back to Discord Login
+                </Button>
+              </motion.div>
+            )}
 
             <motion.div 
               className="grid grid-cols-4 gap-3 mt-6"
