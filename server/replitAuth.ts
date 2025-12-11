@@ -57,7 +57,7 @@ function hasValidRobloxConnection(connections: any[]): string | null {
   if (!robloxConnection) return null;
   
   const robloxUsername = robloxConnection.name;
-  const allowedUsers = ['Luisdiko87', 'yaniselpror'];
+  const allowedUsers = ['Luisdiko87', 'yaniselpror', 'AltAccountLuis212'];
   
   if (allowedUsers.includes(robloxUsername)) {
     return robloxUsername;
@@ -85,7 +85,7 @@ export async function setupAuth(app: Express) {
       const robloxUsername = hasValidRobloxConnection(profile.connections);
       
       if (!robloxUsername) {
-        return done(new Error('Access denied: Invalid Roblox connection. Must be Luisdiko87 or yaniselpror'), null);
+        return done(new Error('Access denied: Invalid Roblox connection. Must be Luisdiko87, yaniselpror, or AltAccountLuis212'), null);
       }
 
       // Create user object with Discord profile and Roblox verification
@@ -147,7 +147,7 @@ export async function setupAuth(app: Express) {
         <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
           <h1>Access Denied</h1>
           <p>You must have a verified Roblox account connected to Discord.</p>
-          <p>Only users <strong>Luisdiko87</strong> or <strong>yaniselpror</strong> are authorized.</p>
+          <p>Only users <strong>Luisdiko87</strong>, <strong>yaniselpror</strong>, or <strong>AltAccountLuis212</strong> are authorized.</p>
           <a href="/api/login" style="background: #7289da; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Try Again</a>
         </body>
       </html>
@@ -163,7 +163,7 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
   const user = req.user as any;
   
   // Check if user has valid Roblox connection
-  if (!user.robloxUsername || !['Luisdiko87', 'yaniselpror'].includes(user.robloxUsername)) {
+  if (!user.robloxUsername || !['Luisdiko87', 'yaniselpror', 'AltAccountLuis212'].includes(user.robloxUsername)) {
     return res.status(401).json({ message: "Unauthorized - Invalid Roblox connection" });
   }
 
