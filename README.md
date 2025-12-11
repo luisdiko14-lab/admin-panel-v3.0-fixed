@@ -6,7 +6,7 @@ Repository for https://replit.com/@LuisTheDev/RobloxWarTycoon
 
 This is a War Tycoon admin dashboard application built as a full-stack web application. It provides administrative controls for managing a Roblox-style game server with features like rank management, player moderation, territory control, and real-time game monitoring. The application uses a hierarchical rank system with 48 different administrative levels ranging from "NonAdmin" to "41 | Supreme Creator".
 
-# What are .s .ms and .ls files? s=script ms=nodule scirp
+# What are .s .ms and .ls files?
 s=script ms=nodule scirpt, .ls=local script
 
 # User Preferences
