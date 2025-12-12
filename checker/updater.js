@@ -1,3 +1,4 @@
+alert("Welcome!")
 let progress = 0;
 const loadingBar = document.getElementById('loadingBar');
 const status = document.getElementById('status');
@@ -7,7 +8,7 @@ const interval = setInterval(() => {
     clearInterval(interval);
     status.textContent = "Login checked successfully! ✅";
   } else {
-    progress += 0.2; // Increase by 0.2%
+    progress += 1.8; // Increase by 1.8%
     loadingBar.style.width = progress + '%';
     loadingBar.textContent = Math.floor(progress) + '%';
   }

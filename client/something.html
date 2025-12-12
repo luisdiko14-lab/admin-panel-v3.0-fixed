@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cool HTML Updater</title>
+    <script>
+        function updateContent() {
+            // You can replace this with any dynamic content loading mechanism
+            // such as fetching data from an API.
+            var currentTime = new Date().toLocaleTimeString();
+            document.getElementById("dynamic-content").innerText = "Current time: " + currentTime;
+        }
+
+        // Update the content every second (1000 milliseconds)
+        setInterval(updateContent, 1000);
+    </script>
+</head>
+<body>
+    <h1>Dynamic Content Example</h1>
+    <div id="dynamic-content">
+        <!-- Initial content will be replaced by JavaScript -->
+        Loading...
+    </div>
+</body>
+</html>
