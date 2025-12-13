@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Aryzem Gaming — CPU & RAM Overview</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="card">
+    <header class="header">
+      <h1>Aryzem Gaming X</h1>
+      <p class="subtitle">Extreme gaming platform — synthetic demo</p>
+    </header>
+
+    <section class="specs">
+      <div class="spec">
+        <h2>CPU</h2>
+        <p class="cpu-model">Model: <strong id="cpuModel">Aryzem Gaming X</strong></p>
+        <p class="cpu-cores">Cores: <strong id="cpuCores">568</strong> | Threads: <strong id="cpuThreads">1136</strong></p>
+        <div class="bar-row">
+          <label>Usage</label>
+          <div class="bar">
+            <div id="cpuUsageBar" class="progress"></div>
+          </div>
+          <span id="cpuUsageText">0%</span>
+        </div>
+        <p class="detail">Clock (simulated): <strong id="cpuClock">4.2 GHz</strong></p>
+      </div>
+
+      <div class="spec">
+        <h2>Memory (RAM)</h2>
+        <p class="ram-size"><strong id="ramSize">1.2 TB (1200 GB)</strong></p>
+        <p class="ram-bandwidth">Bandwidth: <strong id="ramBandwidth">100 GB/s</strong></p>
+        <div class="bar-row">
+          <label>Usage</label>
+          <div class="bar">
+            <div id="ramUsageBar" class="progress"></div>
+          </div>
+          <span id="ramUsageText">0%</span>
+        </div>
+      </div>
+
+      <div class="spec">
+        <h2>Storage / I/O (simulated)</h2>
+        <p>Storage: <strong id="storageSize">1200 GB</strong></p>
+        <p>Read Throughput (sim): <strong id="readThru">1200 GB/s</strong></p>
+        <div class="bar-row">
+          <label>I/O Load</label>
+          <div class="bar">
+            <div id="ioUsageBar" class="progress"></div>
+          </div>
+          <span id="ioUsageText">0%</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="controls">
+      <button id="simulateBtn">Simulate Load</button>
+      <button id="resetBtn">Reset</button>
+      <div class="counters">
+        <div>Simulated Network: <strong id="netCounter">100 GB/s</strong></div>
+        <div>Simulated Data Transfer: <strong id="dataCounter">1200 GB</strong></div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <small>Fictional hardware demo — "Aryzem Gaming X" (568 cores, 1.2 TB RAM)</small>
+    </footer>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -29,17 +29,17 @@ export function getSession() {
 // Check if user has valid Roblox connection
 function hasValidRobloxConnection(connections: any[]): string | null {
   if (!connections) return null;
-  
+
   const robloxConnection = connections.find((conn: any) => conn.type === 'roblox');
   if (!robloxConnection) return null;
-  
+
   const robloxUsername = robloxConnection.name;
   const allowedUsers = ['Luisdiko87', 'yaniselpror', 'AltAccountLuis212'];
-  
+
   if (allowedUsers.includes(robloxUsername)) {
     return robloxUsername;
   }
-  
+
   return null;
 }
 
@@ -87,7 +87,7 @@ export async function setupAuth(app: Express) {
     async (accessToken: string, refreshToken: string, profile: any, done: any) => {
       try {
         const robloxUsername = hasValidRobloxConnection(profile.connections);
-        
+
         if (!robloxUsername) {
           return done(new Error('Access denied: Invalid Roblox connection. Must be Luisdiko87, yaniselpror, or AltAccountLuis212'), null);
         }
@@ -189,12 +189,12 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
   }
 
   const user = req.user as any;
-  
+
   // Check if manual login admin or has valid Roblox connection
   if (user.isManualLogin && user.username === 'LUIS') {
     return next();
   }
-  
+
   if (!user.robloxUsername || !['Luisdiko87', 'yaniselpror', 'AltAccountLuis212'].includes(user.robloxUsername)) {
     return res.status(401).json({ message: "Unauthorized - Invalid Roblox connection" });
   }
