@@ -9,6 +9,7 @@ import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import Servers from "@/pages/servers";
 import DiscordDashboard from "@/pages/discord-dashboard";
+import SpecsDashboard from "@/pages/specs-dashboard";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -22,6 +23,7 @@ function Router() {
           <Route path="/" component={Dashboard} />
           <Route path="/servers" component={Servers} />
           <Route path="/discord" component={DiscordDashboard} />
+          <Route path="/specs" component={SpecsDashboard} />
         </>
       )}
       <Route component={NotFound} />

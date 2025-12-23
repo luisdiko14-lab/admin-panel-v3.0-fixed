@@ -34,7 +34,7 @@ function hasValidRobloxConnection(connections: any[]): string | null {
   if (!robloxConnection) return null;
 
   const robloxUsername = robloxConnection.name;
-  const allowedUsers = ['Luisdiko87', 'yaniselpror', 'AltAccountLuis212'];
+  const allowedUsers = ['Luisdiko87', 'Luisdiko19', 'yaniselpror', 'AltAccountLuis212'];
 
   if (allowedUsers.includes(robloxUsername)) {
     return robloxUsername;
@@ -197,7 +197,7 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     return next();
   }
 
-  if (!user.robloxUsername || !['Luisdiko87', 'yaniselpror', 'AltAccountLuis212'].includes(user.robloxUsername)) {
+  if (!user.robloxUsername || !['Luisdiko87', 'Luisdiko19', 'yaniselpror', 'AltAccountLuis212'].includes(user.robloxUsername)) {
     return res.status(401).json({ message: "Unauthorized - Invalid Roblox connection" });
   }
 
