@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { motion } from "framer-motion";
 import { Shield, Users, Terminal, Map, Crown, Zap, Lock, Sword, Target, Star, User, Key } from "lucide-react";
-import { SiDiscord, SiRobloxstudio } from "react-icons/si";
+import { SiDiscord } from "react-icons/si";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -110,10 +110,6 @@ export default function Landing() {
                 DiscordHub Pro
               </motion.h1>
               <p className="text-gray-400 text-lg">Server & Game Administration Hub</p>
-              <div className="flex items-center justify-center gap-2 mt-2">
-                <SiRobloxstudio className="text-red-400 w-4 h-4" />
-                <p className="text-xs text-purple-400 font-mono">Game ID: 81068715488268</p>
-              </div>
             </motion.div>
 
             {!showManualLogin ? (
@@ -132,14 +128,14 @@ export default function Landing() {
                   <div className="text-sm text-gray-300 space-y-2">
                     <div className="flex items-center justify-center gap-2">
                       <Zap className="w-4 h-4 text-yellow-400" />
-                      <span>Must have Roblox account linked to Discord</span>
+                      <span>Authorized Discord users only</span>
                     </div>
                     <div className="flex items-start justify-center gap-2">
                       <Star className="w-4 h-4 text-amber-400 mt-0.5" />
-                      <span>Authorized: 
+                      <span>Admins: 
                         <span className="text-amber-400 font-mono mx-1">Luisdiko87</span>
+                        <span className="text-amber-400 font-mono mx-1">Luisdiko19</span>
                         <span className="text-amber-400 font-mono mx-1">yaniselpror</span>
-                        <span className="text-amber-400 font-mono mx-1">AltAccountLuis212</span>
                       </span>
                     </div>
                   </div>
@@ -303,11 +299,11 @@ export default function Landing() {
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-400 bg-gray-800/30 rounded-lg p-2">
                   <Sword className="w-4 h-4 text-purple-400" />
-                  Discord Bot Control
+                  Guild Management
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-400 bg-gray-800/30 rounded-lg p-2">
                   <Zap className="w-4 h-4 text-yellow-400" />
-                  Real-time Sync
+                  System Specs
                 </div>
               </div>
             </motion.div>
