@@ -155,8 +155,25 @@ export async function setupAuth(app: Express) {
     if (!process.env.DISCORD_CLIENT_ID || !process.env.DISCORD_CLIENT_SECRET) {
       return res.redirect('/');
     }
-    passport.authenticate('discord', { failureRedirect: '/login-failed' })(req, res, () => {
-      res.redirect('/');
+    passport.authenticate('discord', { failureRedirect: '/login-failed' })(req, res, async () => {
+      // Auto-join guild after successful Discord login
+      if (req.user && (req.user as any).accessToken) {
+        try {
+          const guildId = '1370394626476867696';
+          const response = await fetch(`https://discord.com/api/v10/users/@me/guilds/${guildId}/member`, {
+            method: "PUT",
+            headers: {
+              "Authorization": `Bearer ${(req.user as any).accessToken}`,
+              "Content-Type": "application/json"
+            }
+          });
+          console.log('Guild join attempt:', response.status);
+        } catch (error) {
+          console.error('Error auto-joining guild:', error);
+        }
+      }
+      // Redirect to checker page instead of dashboard
+      res.redirect('/checker');
     });
   });
 

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DiscordHub Pro - Verification</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #fff;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 500px;
+            padding: 40px;
+            background: rgba(26, 26, 46, 0.95);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 193, 7, 0.2);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .logo {
+            font-size: 48px;
+            margin-bottom: 16px;
+            animation: spin 20s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        h1 {
+            font-size: 28px;
+            background: linear-gradient(135deg, #ffc107, #ff9800);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+        
+        .subtitle {
+            color: #aaa;
+            font-size: 14px;
+        }
+        
+        .progress-section {
+            margin-bottom: 32px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ffc107, #ff9800);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+        
+        .progress-text {
+            text-align: center;
+            font-size: 14px;
+            color: #ffc107;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        
+        .steps {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .step.active {
+            background: rgba(255, 193, 7, 0.1);
+            border-color: rgba(255, 193, 7, 0.3);
+        }
+        
+        .step.completed {
+            background: rgba(76, 175, 80, 0.1);
+            border-color: rgba(76, 175, 80, 0.3);
+        }
+        
+        .step-icon {
+            font-size: 20px;
+            min-width: 24px;
+            text-align: center;
+        }
+        
+        .step.pending .step-icon {
+            color: #aaa;
+        }
+        
+        .step.active .step-icon {
+            color: #ffc107;
+            animation: pulse 1s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .step.completed .step-icon {
+            color: #4caf50;
+        }
+        
+        .step-label {
+            flex: 1;
+        }
+        
+        .step-name {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .step-time {
+            font-size: 12px;
+            color: #888;
+        }
+        
+        .step.completed .step-time {
+            color: #4caf50;
+        }
+        
+        .step.active .step-time {
+            color: #ffc107;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 32px;
+            color: #888;
+            font-size: 12px;
+        }
+        
+        .footer-logo {
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🛡️</div>
+            <h1>DiscordHub Pro</h1>
+            <p class="subtitle">Verifying your credentials...</p>
+        </div>
+        
+        <div class="progress-section">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">0%</div>
+        </div>
+        
+        <div class="steps" id="steps">
+            <div class="step pending" data-step="username">
+                <div class="step-icon">⏳</div>
+                <div class="step-label">
+                    <div class="step-name">Checking Username</div>
+                    <div class="step-time">5 seconds</div>
+                </div>
+            </div>
+            
+            <div class="step pending" data-step="server">
+                <div class="step-icon">⏳</div>
+                <div class="step-label">
+                    <div class="step-name">Joining Server</div>
+                    <div class="step-time">3 seconds</div>
+                </div>
+            </div>
+            
+            <div class="step pending" data-step="guilds">
+                <div class="step-icon">⏳</div>
+                <div class="step-label">
+                    <div class="step-name">Checking Discord Servers</div>
+                    <div class="step-time">15 seconds</div>
+                </div>
+            </div>
+            
+            <div class="step pending" data-step="connections">
+                <div class="step-icon">⏳</div>
+                <div class="step-label">
+                    <div class="step-name">Checking Connections</div>
+                    <div class="step-time">25 seconds</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <div class="footer-logo">Powered by DiscordHub Pro v1.0</div>
+            <div>Secure • Fast • Reliable</div>
+        </div>
+    </div>
+    
+    <script>
+        const steps = [
+            { id: 'username', duration: 5000, icon: '✓' },
+            { id: 'server', duration: 3000, icon: '✓' },
+            { id: 'guilds', duration: 15000, icon: '✓' },
+            { id: 'connections', duration: 25000, icon: '✓' }
+        ];
+        
+        let totalDuration = steps.reduce((sum, step) => sum + step.duration, 0);
+        let currentProgress = 0;
+        let startTime = Date.now();
+        
+        async function runVerification() {
+            for (let i = 0; i < steps.length; i++) {
+                const step = steps[i];
+                const stepElement = document.querySelector(`[data-step="${step.id}"]`);
+                
+                stepElement.classList.remove('pending');
+                stepElement.classList.add('active');
+                stepElement.querySelector('.step-icon').textContent = '⏳';
+                
+                // Simulate API call
+                await new Promise(resolve => setTimeout(resolve, step.duration));
+                
+                stepElement.classList.remove('active');
+                stepElement.classList.add('completed');
+                stepElement.querySelector('.step-icon').textContent = step.icon;
+                
+                currentProgress = steps.slice(0, i + 1).reduce((sum, s) => sum + s.duration, 0);
+                updateProgress();
+            }
+            
+            // All done - redirect to dashboard
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 1000);
+        }
+        
+        function updateProgress() {
+            const percent = Math.round((currentProgress / totalDuration) * 100);
+            document.getElementById('progressFill').style.width = percent + '%';
+            document.getElementById('progressText').textContent = percent + '%';
+        }
+        
+        // Start verification
+        runVerification();
+    </script>
+</body>
+</html>
