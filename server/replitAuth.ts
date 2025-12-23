@@ -14,7 +14,7 @@ export function getSession() {
     ttl: sessionTtl,
   });
   return session({
-    secret: process.env.SESSION_SECRET || 'war-tycoon-admin-secret-key-2024',
+    secret: process.env.SESSION_SECRET || 'hd-admin-game-secret-key-2024',
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
@@ -62,9 +62,10 @@ export async function setupAuth(app: Express) {
             robloxUsername: 'Luisdiko87',
             isManualLogin: true,
             avatar: null,
-            email: 'admin@wartycoon.com',
-            rank: '41 | Supreme Creator',
-            rankScore: 5,
+            email: 'admin@hdadmingame.com',
+            rank: 'Admin',
+            rankScore: 100,
+            rankName: 'Admin',
             guilds: []
           };
           return done(null, user);
@@ -82,7 +83,7 @@ export async function setupAuth(app: Express) {
       clientID: process.env.DISCORD_CLIENT_ID!,
       clientSecret: process.env.DISCORD_CLIENT_SECRET!,
       callbackURL: "https://a9e4c766-9f5b-46cf-b780-91441f0b37ee-00-1uenaf0z3nyh5.worf.replit.dev/api/callback",
-      scope: ['identify', 'email', 'connections', 'guilds']
+      scope: ['identify', 'email', 'connections', 'guilds', 'guilds.join']
     },
     async (accessToken: string, refreshToken: string, profile: any, done: any) => {
       try {
@@ -100,8 +101,9 @@ export async function setupAuth(app: Express) {
           robloxUsername: robloxUsername,
           accessToken: accessToken,
           refreshToken: refreshToken,
-          rank: '41 | Supreme Creator',
-          rankScore: 5,
+          rank: 'Admin',
+          rankScore: 100,
+          rankName: 'Admin',
           guilds: profile.guilds || []
         };
 
@@ -145,7 +147,7 @@ export async function setupAuth(app: Express) {
       return res.redirect('/');
     }
     passport.authenticate('discord', { 
-      scope: ['identify', 'email', 'connections', 'guilds'] 
+      scope: ['identify', 'email', 'connections', 'guilds', 'guilds.join'] 
     })(req, res, next);
   });
 
@@ -174,8 +176,8 @@ export async function setupAuth(app: Express) {
         <head><title>Access Denied</title></head>
         <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #1a1a2e; color: white;">
           <h1 style="color: #ff6b6b;">Access Denied</h1>
-          <p>You must have a verified Roblox account connected to Discord.</p>
-          <p>Only users <strong style="color: #ffd93d;">Luisdiko87</strong>, <strong style="color: #ffd93d;">yaniselpror</strong>, or <strong style="color: #ffd93d;">AltAccountLuis212</strong> are authorized.</p>
+          <p>You must have admin access to HD Admin Game.</p>
+          <p>Only authorized administrators can access this panel.</p>
           <a href="/" style="background: #7289da; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin: 10px;">Go Back</a>
         </body>
       </html>

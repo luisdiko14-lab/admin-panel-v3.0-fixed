@@ -36,7 +36,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         { rankScore: 4.91, rankName: "26 | Supreme Sheriff", permissions: ["kick", "warn"] },
         { rankScore: 4.855, rankName: "10 | Supreme Owner", permissions: ["kick"] },
         { rankScore: 1, rankName: "1 | Supreme VIP", permissions: ["vip"] },
-        { rankScore: 0, rankName: "NonAdmin", permissions: [] },
+        { rankScore: 0, rankName: "Admin", permissions: [] },
       ];
 
       for (const rank of ranksData) {

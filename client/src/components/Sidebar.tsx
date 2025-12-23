@@ -11,7 +11,7 @@ export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
   const tabs = [
     { id: "dashboard", label: "Dashboard", icon: "fas fa-tachometer-alt" },
     { id: "ranks", label: "Rank Management", icon: "fas fa-crown" },
-    { id: "tycoon", label: "Tycoon Control", icon: "fas fa-industry" },
+    { id: "tycoon", label: "Game Control", icon: "fas fa-industry" },
     { id: "players", label: "Player Management", icon: "fas fa-users" },
     { id: "commands", label: "Admin Commands", icon: "fas fa-terminal" },
     { id: "logs", label: "Activity Logs", icon: "fas fa-list-alt" },

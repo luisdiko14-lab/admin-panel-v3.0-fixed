@@ -62,7 +62,7 @@ export default function Dashboard() {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-gray-400 text-sm">Active Tycoons</p>
+                      <p className="text-gray-400 text-sm">Active Servers</p>
                       <p className="text-2xl font-bold text-blue-400">
                         {stats?.activeTycoons || 0}
                       </p>
@@ -76,12 +76,12 @@ export default function Dashboard() {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-gray-400 text-sm">Total Revenue</p>
+                      <p className="text-gray-400 text-sm">Total Resources</p>
                       <p className="text-2xl font-bold text-game-amber">
                         {formatNumber(stats?.totalRevenue || 0)}
                       </p>
                     </div>
-                    <i className="fas fa-dollar-sign text-game-amber text-2xl"></i>
+                    <i className="fas fa-database text-game-amber text-2xl"></i>
                   </div>
                 </CardContent>
               </Card>

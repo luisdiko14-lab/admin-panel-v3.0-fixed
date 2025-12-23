@@ -34,7 +34,7 @@ export const users = pgTable("users", {
   profileImageUrl: varchar("profile_image_url"),
   username: varchar("username").unique(),
   rankScore: real("rank_score").default(0),
-  rankName: varchar("rank_name").default("NonAdmin"),
+  rankName: varchar("rank_name").default("Admin"),
   isBanned: boolean("is_banned").default(false),
   lastSeen: timestamp("last_seen").defaultNow(),
   createdAt: timestamp("created_at").defaultNow(),
