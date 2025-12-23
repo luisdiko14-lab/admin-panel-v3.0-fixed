@@ -10,7 +10,7 @@ export default function TopNavigation() {
       <div className="flex items-center justify-between max-w-7xl mx-auto">
         <div className="flex items-center space-x-4">
           <i className="fas fa-shield-alt text-game-amber text-2xl"></i>
-          <h1 className="text-xl font-bold">War Tycoon Admin Dashboard</h1>
+          <h1 className="text-xl font-bold">DiscordHub Pro Dashboard</h1>
           <div className={`px-3 py-1 rounded-full text-sm ${
             isConnected 
               ? "bg-game-green/20 text-game-green" 
@@ -28,7 +28,7 @@ export default function TopNavigation() {
               {user?.firstName || user?.username || "Admin User"}
             </div>
             <div className="text-xs text-game-amber">
-              {user?.rankName || "NonAdmin"}
+              {user?.rankName || "Admin"}
             </div>
           </div>
           <img 

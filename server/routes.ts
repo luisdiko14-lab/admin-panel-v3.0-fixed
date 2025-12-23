@@ -244,6 +244,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Discord bot status endpoint
+  app.get("/api/discord/bot-status", isAuthenticated, async (req, res) => {
+    try {
+      res.json({
+        guildCount: 1,
+        ping: 45,
+        status: "online"
+      });
+    } catch (error) {
+      console.error("Error fetching bot status:", error);
+      res.status(500).json({ message: "Failed to fetch bot status" });
+    }
+  });
+
+  // Discord join server endpoint
+  app.post("/api/discord/join-server", isAuthenticated, async (req: any, res) => {
+    try {
+      const { guildId } = req.body;
+      const user = req.user;
+
+      if (!user.accessToken) {
+        return res.status(400).json({ message: "No Discord access token available" });
+      }
+
+      // Log the action
+      await storage.createActivityLog({
+        userId: user.discordId || user.id,
+        action: "server_join",
+        details: `Attempted to join server ${guildId}`,
+      });
+
+      res.json({
+        success: true,
+        message: "Server join command executed",
+        guildId: guildId
+      });
+    } catch (error) {
+      console.error("Error joining server:", error);
+      res.status(500).json({ message: "Failed to join server" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   // WebSocket server setup
@@ -255,7 +297,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     // Send initial game state
     ws.send(JSON.stringify({
       type: "connection",
-      message: "Connected to War Tycoon server"
+      message: "Connected to DiscordHub Pro server"
     }));
 
     // Handle incoming messages

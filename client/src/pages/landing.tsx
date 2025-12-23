@@ -107,9 +107,9 @@ export default function Landing() {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3 }}
               >
-                War Tycoon
+                DiscordHub Pro
               </motion.h1>
-              <p className="text-gray-400 text-lg">Administrative Control Center</p>
+              <p className="text-gray-400 text-lg">Server & Game Administration Hub</p>
               <div className="flex items-center justify-center gap-2 mt-2">
                 <SiRobloxstudio className="text-red-400 w-4 h-4" />
                 <p className="text-xs text-purple-400 font-mono">Game ID: 81068715488268</p>
@@ -303,11 +303,11 @@ export default function Landing() {
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-400 bg-gray-800/30 rounded-lg p-2">
                   <Sword className="w-4 h-4 text-purple-400" />
-                  War Commands
+                  Discord Bot Control
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-400 bg-gray-800/30 rounded-lg p-2">
                   <Zap className="w-4 h-4 text-yellow-400" />
-                  WebSocket Live
+                  Real-time Sync
                 </div>
               </div>
             </motion.div>
@@ -319,9 +319,9 @@ export default function Landing() {
               transition={{ delay: 0.8 }}
             >
               <Shield className="w-3 h-3" />
-              <span>Powered by HD Admin v6.2.3</span>
+              <span>DiscordHub Pro v1.0</span>
               <span>•</span>
-              <span>Secure Authentication</span>
+              <span>Secure Discord OAuth</span>
             </motion.div>
           </CardContent>
         </Card>

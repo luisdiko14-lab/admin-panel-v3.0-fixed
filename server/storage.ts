@@ -63,7 +63,7 @@ export class MemStorage implements IStorage {
       profileImageUrl: userData.profileImageUrl || null,
       username: userData.username || userData.firstName || 'User',
       rankScore: userData.rankScore ?? 0,
-      rankName: userData.rankName || 'NonAdmin',
+      rankName: userData.rankName || 'Admin',
       isBanned: userData.isBanned ?? false,
       lastSeen: userData.lastSeen || new Date(),
       createdAt: existing?.createdAt || new Date(),

@@ -94,7 +94,7 @@ export default function RankManagement() {
             <SelectItem value="admin">Administrative (4.0-4.5)</SelectItem>
             <SelectItem value="staff">Staff (1.0-4.0)</SelectItem>
             <SelectItem value="vip">VIP (0.1-1.0)</SelectItem>
-            <SelectItem value="nonadmin">NonAdmin (0.0)</SelectItem>
+            <SelectItem value="nonadmin">Admin (0.0)</SelectItem>
           </SelectContent>
         </Select>
       </div>

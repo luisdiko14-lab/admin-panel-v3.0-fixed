@@ -39,6 +39,15 @@ export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
         ))}
         
         <div className="pt-4 mt-4 border-t border-gray-700">
+          <Link href="/discord">
+            <button
+              data-testid="sidebar-link-discord"
+              className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors hover:bg-indigo-600/20 text-indigo-400 mb-2"
+            >
+              <i className="fab fa-discord text-lg"></i>
+              <span>Discord Control</span>
+            </button>
+          </Link>
           <Link href="/servers">
             <button
               data-testid="sidebar-link-servers"
