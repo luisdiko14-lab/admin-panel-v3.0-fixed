@@ -332,6 +332,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Checker verification page
+  app.get("/checker", (req, res) => {
+    const checkerPath = path.join(process.cwd(), 'checker', 'checker.html');
+    if (fs.existsSync(checkerPath)) {
+      res.sendFile(checkerPath);
+    } else {
+      res.status(404).send('Checker page not found');
+    }
+  });
+
   const httpServer = createServer(app);
 
   // WebSocket server setup
