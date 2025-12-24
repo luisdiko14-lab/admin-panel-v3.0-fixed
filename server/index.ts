@@ -1,6 +1,9 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { fork } from "child_process";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
 
 const app = express();
 app.use(express.json());
@@ -68,4 +71,32 @@ app.use((req, res, next) => {
   }, () => {
     log(`serving on port ${port}`);
   });
+
+  // Start Discord bot
+  if (process.env.TOKEN) {
+    try {
+      const __filename = fileURLToPath(import.meta.url);
+      const __dirname = dirname(__filename);
+      const botPath = join(__dirname, '..', 'discord-bot.js');
+      
+      const botProcess = fork(botPath, {
+        stdio: 'inherit',
+        env: process.env
+      });
+
+      botProcess.on('error', (err) => {
+        console.error('Discord bot error:', err);
+      });
+
+      botProcess.on('exit', (code) => {
+        if (code !== 0) {
+          console.error(`Discord bot exited with code ${code}`);
+        }
+      });
+
+      log('Discord bot started');
+    } catch (error) {
+      console.error('Failed to start Discord bot:', error);
+    }
+  }
 })();

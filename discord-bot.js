@@ -99,7 +99,7 @@ client.on("messageCreate", async (message) => {
     }
 
     const typeMap = { playing: 0, streaming: 1, listening: 2, competing: 5 };
-    client.user.setActivity(activity, { type: typeMap[type as keyof typeof typeMap] });
+    client.user.setActivity(activity, { type: typeMap[type] });
     message.reply(`✅ Bot activity changed to **${type.toUpperCase()} ${activity}**`);
   }
 });
