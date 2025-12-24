@@ -10,6 +10,7 @@ import Dashboard from "@/pages/dashboard";
 import Servers from "@/pages/servers";
 import DiscordDashboard from "@/pages/discord-dashboard";
 import SpecsDashboard from "@/pages/specs-dashboard";
+import BotConfig from "@/pages/bot-config";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -24,6 +25,7 @@ function Router() {
           <Route path="/servers" component={Servers} />
           <Route path="/discord" component={DiscordDashboard} />
           <Route path="/specs" component={SpecsDashboard} />
+          <Route path="/bot-config" component={BotConfig} />
         </>
       )}
       <Route component={NotFound} />

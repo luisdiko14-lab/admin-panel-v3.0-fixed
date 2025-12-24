@@ -57,6 +57,15 @@ export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
               <span>Discord Control</span>
             </button>
           </Link>
+          <Link href="/bot-config">
+            <button
+              data-testid="sidebar-link-bot-config"
+              className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors hover:bg-amber-600/20 text-amber-400 mb-2"
+            >
+              <i className="fas fa-cogs text-lg"></i>
+              <span>Bot Config</span>
+            </button>
+          </Link>
           <Link href="/servers">
             <button
               data-testid="sidebar-link-servers"
