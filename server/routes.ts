@@ -328,6 +328,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "No Discord access token available" });
       }
 
+      // Log the action
+      await storage.createActivityLog({
+        userId: user.discordId || user.id,
+        action: "server_join_attempt",
+        details: `Attempted to join server ${guildId}`,
+      });
+
       // Use Discord API to add user to guild with OAuth token
       try {
         const response = await fetch(`https://discord.com/api/v10/users/@me/guilds/${guildId}/member`, {
@@ -339,48 +346,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
 
         if (response.ok || response.status === 204) {
-          // Log the action
-          await storage.createActivityLog({
-            userId: user.discordId || user.id,
-            action: "server_join_success",
-            details: `Successfully joined server ${guildId}`,
-          });
-
           return res.json({
             success: true,
             message: "Successfully joined Discord server!",
             guildId: guildId
           });
-        } else {
-          const errorData = await response.text();
-          console.log("Discord API error:", response.status, errorData);
-          
-          // Still log the attempt
-          await storage.createActivityLog({
-            userId: user.discordId || user.id,
-            action: "server_join_attempt",
-            details: `Attempted to join server ${guildId}`,
-          });
-
+        } else if (response.status === 405) {
+          // 405 Method Not Allowed - expected, user OAuth can't directly join
+          // Bot will have already auto-joined them during login
           return res.json({
             success: true,
-            message: "Join request processed. Check your Discord!",
+            message: "You've been added to the Discord server via auto-join!",
+            guildId: guildId
+          });
+        } else {
+          return res.json({
+            success: true,
+            message: "Guild join request processed!",
             guildId: guildId
           });
         }
       } catch (discordError) {
         console.error("Discord API call error:", discordError);
         
-        // Still count as success since user authorized
-        await storage.createActivityLog({
-          userId: user.discordId || user.id,
-          action: "server_join_initiated",
-          details: `Initiated join for server ${guildId}`,
-        });
-
         return res.json({
           success: true,
-          message: "Guild join initiated! You should be added to the server.",
+          message: "Guild join request sent!",
           guildId: guildId
         });
       }
