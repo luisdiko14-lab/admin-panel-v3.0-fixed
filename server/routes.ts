@@ -260,6 +260,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Discord connections endpoint
+  app.get("/api/discord/connections", isAuthenticated, async (req: any, res) => {
+    try {
+      const user = req.user;
+
+      if (!user.accessToken) {
+        return res.status(400).json({ message: "No Discord access token available" });
+      }
+
+      // Fetch user profile
+      const profileResponse = await fetch('https://discord.com/api/v10/users/@me', {
+        headers: {
+          "Authorization": `Bearer ${user.accessToken}`,
+        }
+      });
+
+      if (!profileResponse.ok) {
+        return res.status(400).json({ message: "Failed to fetch user profile" });
+      }
+
+      const profile = await profileResponse.json();
+
+      // Fetch user connections
+      const connectionsResponse = await fetch('https://discord.com/api/v10/users/@me/connections', {
+        headers: {
+          "Authorization": `Bearer ${user.accessToken}`,
+        }
+      });
+
+      let connections = [];
+      if (connectionsResponse.ok) {
+        connections = await connectionsResponse.json();
+      }
+
+      res.json({
+        profile: {
+          id: profile.id,
+          username: profile.username,
+          discriminator: profile.discriminator,
+          avatar: profile.avatar,
+          email: profile.email,
+          verified: profile.verified,
+          avatar_url: profile.avatar ? `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.png` : null
+        },
+        connections: connections.map((conn: any) => ({
+          id: conn.id,
+          type: conn.type,
+          name: conn.name,
+          verified: conn.verified,
+          visibility: conn.visibility
+        }))
+      });
+    } catch (error) {
+      console.error("Error fetching Discord connections:", error);
+      res.status(500).json({ message: "Failed to fetch Discord connections" });
+    }
+  });
+
   // Discord join server endpoint
   app.post("/api/discord/join-server", isAuthenticated, async (req: any, res) => {
     try {

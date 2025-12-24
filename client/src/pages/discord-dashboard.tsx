@@ -6,6 +6,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { SiDiscord } from "react-icons/si";
 import { useState } from "react";
+import { Users, Link as LinkIcon } from "lucide-react";
 
 export default function DiscordDashboard() {
   const { user } = useAuth();
@@ -14,7 +15,11 @@ export default function DiscordDashboard() {
 
   const { data: botStatus } = useQuery({
     queryKey: ["/api/discord/bot-status"],
-  });
+  }) as any;
+
+  const { data: connectionData, isLoading: connectionsLoading } = useQuery({
+    queryKey: ["/api/discord/connections"],
+  }) as any;
 
   const joinServerMutation = useMutation({
     mutationFn: async () => {
@@ -99,6 +104,85 @@ export default function DiscordDashboard() {
             </CardContent>
           </Card>
 
+          {/* User Connections */}
+          <Card className="bg-game-slate border-gray-700">
+            <CardContent className="p-6">
+              <h2 className="text-lg font-semibold mb-4 flex items-center">
+                <Users className="w-5 h-5 text-cyan-400 mr-2" />
+                Your Connections
+              </h2>
+              {connectionsLoading ? (
+                <div className="text-center text-gray-400 py-8">Loading connections...</div>
+              ) : connectionData ? (
+                <div className="space-y-4">
+                  {/* Profile Info */}
+                  <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-700">
+                    <div className="flex items-center gap-4">
+                      {connectionData.profile.avatar_url ? (
+                        <img 
+                          src={connectionData.profile.avatar_url} 
+                          alt={connectionData.profile.username}
+                          className="w-16 h-16 rounded-full border-2 border-indigo-500"
+                        />
+                      ) : (
+                        <div className="w-16 h-16 rounded-full bg-indigo-600 flex items-center justify-center text-2xl">
+                          👤
+                        </div>
+                      )}
+                      <div>
+                        <p className="text-sm text-gray-400">Discord Profile</p>
+                        <p className="text-lg font-semibold text-white">{connectionData.profile.username}</p>
+                        <p className="text-xs text-gray-500">{connectionData.profile.email}</p>
+                        <div className="flex gap-2 mt-2">
+                          {connectionData.profile.verified && (
+                            <span className="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded">✓ Verified</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Connected Accounts */}
+                  {connectionData.connections && connectionData.connections.length > 0 ? (
+                    <div className="space-y-2">
+                      <p className="text-sm text-gray-400 font-semibold flex items-center gap-2">
+                        <LinkIcon className="w-4 h-4" />
+                        Connected Accounts ({connectionData.connections.length})
+                      </p>
+                      {connectionData.connections.map((conn: any) => (
+                        <div key={`${conn.type}-${conn.id}`} className="bg-gray-900/30 rounded-lg p-3 border border-gray-700 flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="text-xl">
+                              {conn.type === 'twitch' && '📺'}
+                              {conn.type === 'youtube' && '📹'}
+                              {conn.type === 'twitter' && '𝕏'}
+                              {conn.type === 'spotify' && '🎵'}
+                              {conn.type === 'steam' && '🎮'}
+                              {conn.type === 'reddit' && '🔗'}
+                              {conn.type === 'instagram' && '📸'}
+                              {!['twitch', 'youtube', 'twitter', 'spotify', 'steam', 'reddit', 'instagram'].includes(conn.type) && '🔗'}
+                            </div>
+                            <div>
+                              <p className="text-sm font-semibold text-white capitalize">{conn.type}</p>
+                              <p className="text-xs text-gray-400">{conn.name}</p>
+                            </div>
+                          </div>
+                          {conn.verified && (
+                            <span className="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded">Verified</span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500 text-center py-4">No connected accounts</p>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center text-gray-400 py-8">Failed to load connections</div>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Permissions */}
           <Card className="bg-game-slate border-gray-700 md:col-span-2">
             <CardContent className="p-6">
@@ -136,11 +220,11 @@ export default function DiscordDashboard() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <p className="text-gray-400 text-sm mb-1">Username</p>
-                  <p className="font-semibold">{user?.username || "Admin"}</p>
+                  <p className="font-semibold">{(user as any)?.username || "Admin"}</p>
                 </div>
                 <div>
                   <p className="text-gray-400 text-sm mb-1">Rank</p>
-                  <p className="font-semibold text-amber-400">{user?.rankName || "Admin"}</p>
+                  <p className="font-semibold text-amber-400">{(user as any)?.rankName || "Admin"}</p>
                 </div>
                 <div>
                   <p className="text-gray-400 text-sm mb-1">Permissions</p>
