@@ -4,6 +4,7 @@ import { setupVite, serveStatic, log } from "./vite";
 import { fork } from "child_process";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
+import { setupAuth, registerAuthRoutes } from "./replit_integrations/auth";
 
 const app = express();
 app.use(express.json());
@@ -40,6 +41,10 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Setup Replit Auth BEFORE other routes
+  await setupAuth(app);
+  registerAuthRoutes(app);
+
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
