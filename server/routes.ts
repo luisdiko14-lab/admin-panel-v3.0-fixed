@@ -2,16 +2,13 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { isAuthenticated } from "./replit_integrations/auth";
 import { z } from "zod";
 import { insertAdminCommandSchema, insertActivityLogSchema } from "@shared/schema";
 import * as path from "path";
 import * as fs from "fs";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware
-  await setupAuth(app);
-
   // Initialize ranks with the provided rank hierarchy
   const initializeRanks = async () => {
     try {
@@ -379,6 +376,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error joining server:", error);
       res.status(500).json({ message: "Failed to process guild join" });
     }
+  });
+
+  // Discord login route - redirects to Replit login for now
+  app.get("/api/discord-login", (req, res) => {
+    res.redirect("/api/login");
   });
 
   // Checker verification page

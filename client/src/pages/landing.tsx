@@ -6,8 +6,12 @@ import { Shield, Users, Terminal, Map, Crown, Zap, Lock, Sword, Target, Star } f
 import { SiDiscord } from "react-icons/si";
 
 export default function Landing() {
-  const handleDiscordLogin = () => {
+  const handleReplitLogin = () => {
     window.location.href = "/api/login";
+  };
+
+  const handleDiscordLogin = () => {
+    window.location.href = "/api/discord-login";
   };
 
   return (
@@ -96,12 +100,31 @@ export default function Landing() {
               className="space-y-3"
             >
               <Button 
-                onClick={handleDiscordLogin}
+                onClick={handleReplitLogin}
                 data-testid="button-login-replit"
                 className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white py-6 text-lg font-semibold shadow-lg shadow-indigo-500/30 transition-all hover:shadow-indigo-500/50 hover:scale-[1.02]"
               >
                 <SiDiscord className="mr-3 w-6 h-6" />
                 Login with Replit
+              </Button>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-gray-700" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-gray-900 px-2 text-gray-500">or</span>
+                </div>
+              </div>
+
+              <Button 
+                onClick={handleDiscordLogin}
+                data-testid="button-login-discord"
+                variant="outline"
+                className="w-full border-indigo-500/50 text-indigo-400 hover:bg-indigo-500/10 py-5"
+              >
+                <SiDiscord className="mr-2 w-5 h-5" />
+                Login with Discord
               </Button>
             </motion.div>
 
