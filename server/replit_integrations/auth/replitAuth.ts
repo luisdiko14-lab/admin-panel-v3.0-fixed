@@ -51,10 +51,17 @@ function updateUserSession(
 }
 
 async function upsertUser(claims: any) {
-  // Check if user is allowed
-  const userName = claims["username"] || claims["email"]?.split("@")[0] || claims["first_name"];
-  if (userName !== ALLOWED_USER) {
-    throw new Error(`Access denied. Only @${ALLOWED_USER} is authorized to access this application.`);
+  // Check if user is allowed - accept @LuisTheDev (from any source)
+  const userName = claims["username"] || claims["email"]?.split("@")[0] || claims["first_name"] || "";
+  const userEmail = claims["email"] || "";
+  
+  const isAllowed = 
+    userName.toLowerCase().includes("luis") || 
+    userName === ALLOWED_USER || 
+    userEmail.toLowerCase().includes("luis");
+  
+  if (!isAllowed) {
+    throw new Error(`Access denied. Only Luis is authorized to access this application.`);
   }
 
   await authStorage.upsertUser({
