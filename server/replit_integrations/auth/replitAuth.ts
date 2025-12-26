@@ -52,6 +52,23 @@ function isUserAuthorized(username: string, email: string): boolean {
   );
 }
 
+// Check if user has valid Roblox connection
+function hasValidRobloxConnection(connections: any[]): string | null {
+  if (!connections) return null;
+
+  const robloxConnection = connections.find((conn: any) => conn.type === 'roblox');
+  if (!robloxConnection) return null;
+
+  const robloxUsername = robloxConnection.name;
+  const allowedUsers = ['Luisdiko87', 'Luisdiko19', 'yaniselpror', 'AltAccountLuis212'];
+
+  if (allowedUsers.includes(robloxUsername)) {
+    return robloxUsername;
+  }
+
+  return null;
+}
+
 function updateUserSession(
   user: any,
   tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers
@@ -125,16 +142,21 @@ export async function setupAuth(app: Express) {
 
   // Setup Discord OAuth if credentials are available
   if (process.env.DISCORD_CLIENT_ID && process.env.DISCORD_CLIENT_SECRET) {
-    const callbackURL = `https://${process.env.REPLIT_DEPLOYMENT_DOMAIN || 'a9e4c766-9f5b-46cf-b780-91441f0b37ee-00-1uenaf0z3nyh5.worf.replit.dev'}/api/discord-callback`;
     passport.use('discord', new DiscordStrategy({
       clientID: process.env.DISCORD_CLIENT_ID,
       clientSecret: process.env.DISCORD_CLIENT_SECRET,
-      callbackURL: callbackURL,
-      scope: ['identify', 'email', 'guilds', 'guilds.join']
+      callbackURL: "/api/callback",
+      scope: ['identify', 'email', 'connections', 'guilds', 'guilds.join']
     }, async (accessToken: string, refreshToken: string, profile: any, done: any) => {
       try {
         if (!isUserAuthorized(profile.username, profile.email || "")) {
           return done(new Error('Access denied: Only Luis is authorized to access this application.'), null);
+        }
+
+        // Check for valid Roblox connection
+        const robloxUsername = hasValidRobloxConnection(profile.connections);
+        if (!robloxUsername) {
+          return done(new Error('Access denied: Invalid Roblox connection. Must be Luisdiko87, Luisdiko19, yaniselpror, or AltAccountLuis212'), null);
         }
 
         const user = {
@@ -143,6 +165,7 @@ export async function setupAuth(app: Express) {
           username: profile.username,
           email: profile.email,
           avatar: profile.avatar,
+          robloxUsername: robloxUsername,
           accessToken: accessToken,
           refreshToken: refreshToken,
           guilds: profile.guilds || [],
@@ -179,6 +202,27 @@ export async function setupAuth(app: Express) {
   });
 
   app.get("/api/callback", (req, res, next) => {
+    // Check if this is Discord callback by looking for code and auth state
+    const code = req.query.code as string;
+    const state = req.query.state as string;
+    
+    // Try Discord first if we have those specific params that Discord uses
+    if (code && state) {
+      // Try Discord auth - if it fails, fall back to Replit
+      return passport.authenticate('discord', {
+        successRedirect: '/',
+        failureRedirect: '/api/login',
+      })(req, res, () => {
+        // If Discord fails, try Replit
+        ensureStrategy(req.hostname);
+        passport.authenticate(`replitauth:${req.hostname}`, {
+          successReturnToOrRedirect: "/",
+          failureRedirect: "/api/login",
+        })(req, res, next);
+      });
+    }
+    
+    // Default to Replit auth
     ensureStrategy(req.hostname);
     passport.authenticate(`replitauth:${req.hostname}`, {
       successReturnToOrRedirect: "/",
@@ -186,16 +230,9 @@ export async function setupAuth(app: Express) {
     })(req, res, next);
   });
 
-  // Discord login routes
+  // Discord login route
   app.get("/api/discord-login", (req, res, next) => {
     passport.authenticate('discord')(req, res, next);
-  });
-
-  app.get("/api/discord-callback", (req, res, next) => {
-    passport.authenticate('discord', {
-      successRedirect: '/',
-      failureRedirect: '/api/login',
-    })(req, res, next);
   });
 
   app.get("/api/logout", (req, res) => {
