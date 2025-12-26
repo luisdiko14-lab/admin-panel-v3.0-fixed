@@ -150,6 +150,8 @@ export async function setupAuth(app: Express) {
     }, async (accessToken: string, refreshToken: string, profile: any, done: any) => {
       try {
         if (!isUserAuthorized(profile.username, profile.email || "")) {
+console.log("Checking For Acess..."
+)
           return done(new Error('Access denied: Only Luis is authorized to access this application.'), null);
         }
 
