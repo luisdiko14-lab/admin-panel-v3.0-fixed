@@ -9,6 +9,7 @@ export default function Validate() {
   const [, setLocation] = useLocation();
   const [validationData, setValidationData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     const validate = async () => {
@@ -18,19 +19,28 @@ export default function Validate() {
         
         if (data.status === 'validated') {
           setValidationData(data);
+          setLoading(false);
           
-          // Show validation for 2 seconds then redirect
-          setTimeout(() => {
-            setLocation('/dashboard');
-          }, 2000);
+          // Progress bar animation over 20 seconds
+          const startTime = Date.now();
+          const duration = 20000; // 20 seconds
+          
+          const progressInterval = setInterval(() => {
+            const elapsed = Date.now() - startTime;
+            const newProgress = Math.min((elapsed / duration) * 100, 100);
+            setProgress(newProgress);
+            
+            if (elapsed >= duration) {
+              clearInterval(progressInterval);
+              setLocation('/dashboard');
+            }
+          }, 50);
         } else {
           setLocation('/api/login');
         }
       } catch (error) {
         console.error('Validation error:', error);
         setLocation('/api/login');
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -75,7 +85,7 @@ export default function Validate() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
-                    className="bg-gray-800/50 rounded-lg p-4 space-y-3 mb-4"
+                    className="bg-gray-800/50 rounded-lg p-4 space-y-3 mb-6"
                   >
                     <div className="text-left">
                       <p className="text-gray-400 text-sm">Username</p>
@@ -98,7 +108,18 @@ export default function Validate() {
                   </motion.div>
                 )}
                 
-                <p className="text-gray-400 text-sm">Redirecting to dashboard...</p>
+                {/* Progress Bar */}
+                <div className="mb-4">
+                  <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
+                    <motion.div
+                      className="h-full bg-gradient-to-r from-amber-400 to-orange-500"
+                      initial={{ width: "0%" }}
+                      animate={{ width: `${progress}%` }}
+                      transition={{ duration: 0.1 }}
+                    />
+                  </div>
+                  <p className="text-gray-400 text-xs mt-2">{Math.round(progress)}% - Redirecting to dashboard...</p>
+                </div>
               </>
             )}
           </CardContent>
