@@ -202,27 +202,19 @@ export async function setupAuth(app: Express) {
   });
 
   app.get("/api/callback", (req, res, next) => {
-    // Check if this is Discord callback by looking for code and auth state
+    // Check which auth is being used by checking for Discord-specific state
+    // Discord uses 'code' param
     const code = req.query.code as string;
-    const state = req.query.state as string;
     
-    // Try Discord first if we have those specific params that Discord uses
-    if (code && state) {
-      // Try Discord auth - if it fails, fall back to Replit
+    // If we have code param, this is Discord callback
+    if (code) {
       return passport.authenticate('discord', {
         successRedirect: '/',
         failureRedirect: '/api/login',
-      })(req, res, () => {
-        // If Discord fails, try Replit
-        ensureStrategy(req.hostname);
-        passport.authenticate(`replitauth:${req.hostname}`, {
-          successReturnToOrRedirect: "/",
-          failureRedirect: "/api/login",
-        })(req, res, next);
-      });
+      })(req, res, next);
     }
     
-    // Default to Replit auth
+    // Otherwise, use Replit auth
     ensureStrategy(req.hostname);
     passport.authenticate(`replitauth:${req.hostname}`, {
       successReturnToOrRedirect: "/",
