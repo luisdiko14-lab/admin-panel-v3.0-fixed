@@ -153,12 +153,16 @@ export async function setupAuth(app: Express) {
           return done(new Error('Access denied: Only Luis is authorized to access this application.'), null);
         }
 
-        // Check for valid email or username
-        const validEmail = profile.email === 'Luisdiko732@gmail.com';
-        const validUsername = profile.username === 'Luisthegoat7301';
+        // Check for valid email or username (case-insensitive)
+        const profileEmail = (profile.email || '').toLowerCase();
+        const profileUsername = (profile.username || '').toLowerCase();
+        const validEmail = profileEmail === 'luisdiko732@gmail.com';
+        const validUsername = profileUsername === 'luisthegoat7301';
+        
+        console.log('Discord profile:', { email: profileEmail, username: profileUsername, validEmail, validUsername });
         
         if (!validEmail && !validUsername) {
-          return done(new Error('Access denied: Only Luisdiko732@gmail.com or Luisthegoat7301 is authorized'), null);
+          return done(new Error(`Access denied: Email=${profileEmail} Username=${profileUsername} not authorized`), null);
         }
 
         const user = {
