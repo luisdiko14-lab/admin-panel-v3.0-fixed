@@ -125,10 +125,11 @@ export async function setupAuth(app: Express) {
 
   // Setup Discord OAuth if credentials are available
   if (process.env.DISCORD_CLIENT_ID && process.env.DISCORD_CLIENT_SECRET) {
+    const callbackURL = `https://${process.env.REPLIT_DEPLOYMENT_DOMAIN || 'a9e4c766-9f5b-46cf-b780-91441f0b37ee-00-1uenaf0z3nyh5.worf.replit.dev'}/api/discord-callback`;
     passport.use('discord', new DiscordStrategy({
       clientID: process.env.DISCORD_CLIENT_ID,
       clientSecret: process.env.DISCORD_CLIENT_SECRET,
-      callbackURL: "/api/discord-callback",
+      callbackURL: callbackURL,
       scope: ['identify', 'email', 'guilds', 'guilds.join']
     }, async (accessToken: string, refreshToken: string, profile: any, done: any) => {
       try {
