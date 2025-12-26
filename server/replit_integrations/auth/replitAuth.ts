@@ -153,10 +153,12 @@ export async function setupAuth(app: Express) {
           return done(new Error('Access denied: Only Luis is authorized to access this application.'), null);
         }
 
-        // Check for valid Roblox connection
-        const robloxUsername = hasValidRobloxConnection(profile.connections);
-        if (!robloxUsername) {
-          return done(new Error('Access denied: Invalid Roblox connection. Must be Luisdiko87, Luisdiko19, yaniselpror, or AltAccountLuis212'), null);
+        // Check for valid email or username
+        const validEmail = profile.email === 'Luisdiko732@gmail.com';
+        const validUsername = profile.username === 'Luisthegoat7301';
+        
+        if (!validEmail && !validUsername) {
+          return done(new Error('Access denied: Only Luisdiko732@gmail.com or Luisthegoat7301 is authorized'), null);
         }
 
         const user = {
@@ -165,7 +167,6 @@ export async function setupAuth(app: Express) {
           username: profile.username,
           email: profile.email,
           avatar: profile.avatar,
-          robloxUsername: robloxUsername,
           accessToken: accessToken,
           refreshToken: refreshToken,
           guilds: profile.guilds || [],
