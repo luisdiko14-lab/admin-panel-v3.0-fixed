@@ -11,17 +11,20 @@ import Servers from "@/pages/servers";
 import DiscordDashboard from "@/pages/discord-dashboard";
 import SpecsDashboard from "@/pages/specs-dashboard";
 import BotConfig from "@/pages/bot-config";
+import Validate from "@/pages/validate";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
   return (
     <Switch>
+      <Route path="/validate" component={Validate} />
       {isLoading || !isAuthenticated ? (
         <Route path="/" component={Landing} />
       ) : (
         <>
           <Route path="/" component={Dashboard} />
+          <Route path="/dashboard" component={Dashboard} />
           <Route path="/servers" component={Servers} />
           <Route path="/discord" component={DiscordDashboard} />
           <Route path="/specs" component={SpecsDashboard} />

@@ -214,7 +214,7 @@ export async function setupAuth(app: Express) {
     // If we have code param, this is Discord callback
     if (code) {
       return passport.authenticate('discord', {
-        successRedirect: '/',
+        successRedirect: '/validate',
         failureRedirect: '/api/login',
       })(req, res, next);
     }
@@ -222,9 +222,34 @@ export async function setupAuth(app: Express) {
     // Otherwise, use Replit auth
     ensureStrategy(req.hostname);
     passport.authenticate(`replitauth:${req.hostname}`, {
-      successReturnToOrRedirect: "/",
+      successReturnToOrRedirect: "/dashboard",
       failureRedirect: "/api/login",
     })(req, res, next);
+  });
+
+  // Validation endpoint
+  app.get("/api/validate", isAuthenticated, async (req: any, res) => {
+    try {
+      const user = req.user as any;
+      const username = user.username;
+      const email = user.email;
+      const guilds = user.guilds || [];
+      
+      console.log(`✓ Finished Checked Username: ${username}, Email: ${email}`);
+      console.log(`✓ Guilds found: ${guilds.length}`);
+      console.log(`✓ User validated successfully`);
+      
+      res.json({
+        status: 'validated',
+        message: `Finished Checked Username: ${username}, Email: ${email}`,
+        username,
+        email,
+        guilds: guilds.length,
+      });
+    } catch (error) {
+      console.error('Validation error:', error);
+      res.status(500).json({ message: 'Validation failed' });
+    }
   });
 
   // Discord login route
