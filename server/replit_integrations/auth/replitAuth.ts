@@ -1,5 +1,6 @@
 import * as client from "openid-client";
 import { Strategy, type VerifyFunction } from "openid-client/passport";
+import { Strategy as DiscordStrategy } from "passport-discord";
 
 import passport from "passport";
 import session from "express-session";
@@ -37,8 +38,19 @@ export function getSession() {
   });
 }
 
-// Only allow @LuisTheDev to log in
+// Only allow users with "luis" in their name/email
 const ALLOWED_USER = "LuisTheDev";
+
+// Check if user is authorized
+function isUserAuthorized(username: string, email: string): boolean {
+  const userName = (username || "").toLowerCase();
+  const userEmail = (email || "").toLowerCase();
+  return (
+    userName.includes("luis") ||
+    userName === ALLOWED_USER.toLowerCase() ||
+    userEmail.includes("luis")
+  );
+}
 
 function updateUserSession(
   user: any,
@@ -51,16 +63,10 @@ function updateUserSession(
 }
 
 async function upsertUser(claims: any) {
-  // Check if user is allowed - accept @LuisTheDev (from any source)
   const userName = claims["username"] || claims["email"]?.split("@")[0] || claims["first_name"] || "";
   const userEmail = claims["email"] || "";
   
-  const isAllowed = 
-    userName.toLowerCase().includes("luis") || 
-    userName === ALLOWED_USER || 
-    userEmail.toLowerCase().includes("luis");
-  
-  if (!isAllowed) {
+  if (!isUserAuthorized(userName, userEmail)) {
     throw new Error(`Access denied. Only Luis is authorized to access this application.`);
   }
 
@@ -117,6 +123,49 @@ export async function setupAuth(app: Express) {
     }
   };
 
+  // Setup Discord OAuth if credentials are available
+  if (process.env.DISCORD_CLIENT_ID && process.env.DISCORD_CLIENT_SECRET) {
+    passport.use('discord', new DiscordStrategy({
+      clientID: process.env.DISCORD_CLIENT_ID,
+      clientSecret: process.env.DISCORD_CLIENT_SECRET,
+      callbackURL: "/api/discord-callback",
+      scope: ['identify', 'email', 'guilds', 'guilds.join']
+    }, async (accessToken: string, refreshToken: string, profile: any, done: any) => {
+      try {
+        if (!isUserAuthorized(profile.username, profile.email || "")) {
+          return done(new Error('Access denied: Only Luis is authorized to access this application.'), null);
+        }
+
+        const user = {
+          id: profile.id,
+          discordId: profile.id,
+          username: profile.username,
+          email: profile.email,
+          avatar: profile.avatar,
+          accessToken: accessToken,
+          refreshToken: refreshToken,
+          guilds: profile.guilds || [],
+          rank: 'Admin',
+          rankScore: 5,
+          rankName: 'Admin',
+        };
+
+        await authStorage.upsertUser({
+          id: profile.id,
+          email: profile.email,
+          firstName: profile.username,
+          lastName: null,
+          profileImageUrl: profile.avatar ? `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.png` : null,
+        });
+
+        return done(null, user);
+      } catch (error) {
+        console.error('Discord auth error:', error);
+        return done(error, null);
+      }
+    }));
+  }
+
   passport.serializeUser((user: Express.User, cb) => cb(null, user));
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
@@ -136,6 +185,18 @@ export async function setupAuth(app: Express) {
     })(req, res, next);
   });
 
+  // Discord login routes
+  app.get("/api/discord-login", (req, res, next) => {
+    passport.authenticate('discord')(req, res, next);
+  });
+
+  app.get("/api/discord-callback", (req, res, next) => {
+    passport.authenticate('discord', {
+      successRedirect: '/',
+      failureRedirect: '/api/login',
+    })(req, res, next);
+  });
+
   app.get("/api/logout", (req, res) => {
     req.logout(() => {
       res.redirect(
@@ -151,7 +212,17 @@ export async function setupAuth(app: Express) {
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   const user = req.user as any;
 
-  if (!req.isAuthenticated() || !user.expires_at) {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  // Handle Discord auth (no token expiry)
+  if (user.discordId) {
+    return next();
+  }
+
+  // Handle Replit auth (with token expiry)
+  if (!user.expires_at) {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
