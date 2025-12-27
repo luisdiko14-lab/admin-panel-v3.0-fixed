@@ -3,6 +3,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { useAuth } from "@/hooks/useAuth";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
@@ -12,17 +13,6 @@ import DiscordDashboard from "@/pages/discord-dashboard";
 import SpecsDashboard from "@/pages/specs-dashboard";
 import BotConfig from "@/pages/bot-config";
 import Validate from "@/pages/validate";
-
-// Global error handler for unauthorized access
-window.addEventListener("unhandledrejection", (event) => {
-  const error = event.reason;
-  if (error?.name === "UnauthorizedError" || error?.status === 401 || error?.status === 403) {
-    const confirmed = confirm("Your session has expired. Do you want to go to the login page? Click OK to proceed or Cancel to stay.");
-    if (confirmed) {
-      window.location.href = "/";
-    }
-  }
-});
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -50,10 +40,12 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-      </TooltipProvider>
+      <ErrorBoundary>
+        <TooltipProvider>
+          <Toaster />
+          <Router />
+        </TooltipProvider>
+      </ErrorBoundary>
     </QueryClientProvider>
   );
 }
