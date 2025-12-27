@@ -13,6 +13,17 @@ import SpecsDashboard from "@/pages/specs-dashboard";
 import BotConfig from "@/pages/bot-config";
 import Validate from "@/pages/validate";
 
+// Global error handler for unauthorized access
+window.addEventListener("unhandledrejection", (event) => {
+  const error = event.reason;
+  if (error?.name === "UnauthorizedError" || error?.status === 401 || error?.status === 403) {
+    const confirmed = confirm("Your session has expired. Do you want to go to the login page? Click OK to proceed or Cancel to stay.");
+    if (confirmed) {
+      window.location.href = "/";
+    }
+  }
+});
+
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 

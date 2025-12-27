@@ -1,7 +1,17 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
+export class UnauthorizedError extends Error {
+  constructor(public status: number, message: string) {
+    super(message);
+    this.name = "UnauthorizedError";
+  }
+}
+
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
+    if (res.status === 401 || res.status === 403) {
+      throw new UnauthorizedError(res.status, `Unauthorized access (${res.status})`);
+    }
     const text = (await res.text()) || res.statusText;
     throw new Error(`${res.status}: ${text}`);
   }
