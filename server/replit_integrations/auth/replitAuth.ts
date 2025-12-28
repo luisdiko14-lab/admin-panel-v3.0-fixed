@@ -217,7 +217,22 @@ console.log("Checking For Acess..."
     if (code) {
       return passport.authenticate('discord', {
         successRedirect: '/validate',
-        failureRedirect: '/api/login',
+      }, (err: any, user: any, info: any) => {
+        if (err) {
+          // Store error in session and redirect to unauthorized page
+          sessionStorage?.setItem('authError', err.message || 'Authorization failed');
+          const errorMessage = encodeURIComponent(err.message || 'Authorization failed');
+          return res.redirect(`/unauthorized.html?error=${errorMessage}`);
+        }
+        if (!user) {
+          return res.redirect('/unauthorized.html?error=User not found');
+        }
+        req.logIn(user, (loginErr) => {
+          if (loginErr) {
+            return res.redirect(`/unauthorized.html?error=${encodeURIComponent(loginErr.message)}`);
+          }
+          return res.redirect('/validate');
+        });
       })(req, res, next);
     }
     

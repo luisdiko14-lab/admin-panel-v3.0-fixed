@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Access Denied</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 500px;
+      width: 100%;
+      background: #0f3460;
+      border: 2px solid #e94560;
+      border-radius: 12px;
+      padding: 40px;
+      text-align: center;
+      box-shadow: 0 10px 40px rgba(233, 69, 96, 0.2);
+    }
+    
+    .icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 20px;
+      background: rgba(233, 69, 96, 0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+    }
+    
+    h1 {
+      color: #e94560;
+      font-size: 28px;
+      margin-bottom: 15px;
+    }
+    
+    .message {
+      color: #a8b8d8;
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 10px;
+    }
+    
+    .error-details {
+      background: rgba(0, 0, 0, 0.3);
+      border-left: 3px solid #e94560;
+      padding: 15px;
+      margin: 25px 0;
+      text-align: left;
+      border-radius: 4px;
+      color: #e94560;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      word-break: break-all;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+    
+    .buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+    
+    button {
+      flex: 1;
+      min-width: 120px;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-login {
+      background: #e94560;
+      color: white;
+    }
+    
+    .btn-login:hover {
+      background: #d93550;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(233, 69, 96, 0.3);
+    }
+    
+    .btn-back {
+      background: transparent;
+      color: #a8b8d8;
+      border: 1px solid #a8b8d8;
+    }
+    
+    .btn-back:hover {
+      background: rgba(168, 184, 216, 0.1);
+      color: #ffffff;
+    }
+    
+    .info {
+      font-size: 12px;
+      color: #7a8ba8;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon">🔒</div>
+    <h1>Access Denied</h1>
+    <p class="message">
+      Your Discord account is not authorized to access this application.
+    </p>
+    <div class="error-details" id="details"></div>
+    <p class="message" style="margin-top: 20px; color: #7a8ba8;">
+      Only authorized users can access DiscordHub Pro. If you believe this is an error, please contact the administrator.
+    </p>
+    <div class="buttons">
+      <button class="btn-login" onclick="window.location.href = '/api/login'">
+        Try Another Account
+      </button>
+      <button class="btn-back" onclick="window.history.back()">
+        Go Back
+      </button>
+    </div>
+    <p class="info">DiscordHub Pro v1.0</p>
+  </div>
+
+  <script>
+    // Extract error details from URL params or localStorage
+    const params = new URLSearchParams(window.location.search);
+    const error = params.get('error') || sessionStorage.getItem('authError') || 'Unknown authorization error';
+    const detailsEl = document.getElementById('details');
+    
+    if (error && error !== 'Unknown authorization error') {
+      detailsEl.textContent = error;
+    } else {
+      detailsEl.style.display = 'none';
+    }
+    
+    // Clear stored error
+    sessionStorage.removeItem('authError');
+  </script>
+</body>
+</html>
