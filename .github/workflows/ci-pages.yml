@@ -1,4 +1,10 @@
-name: CI + GitHub Pages
+# ===============================================
+# Custom CI + Deploy Workflow
+# Credits: Luis
+# Workflow made by ChatGPT
+# ===============================================
+
+name: CI + Custom Deploy
 
 on:
   push:
@@ -6,74 +12,107 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      # -------------------------------------------
+      # Checkout repository
+      # -------------------------------------------
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      # -------------------------------------------
+      # Setup Node.js
+      # -------------------------------------------
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
 
-      # ---------- FRONTEND ----------
-      - name: Install frontend deps
+      # -------------------------------------------
+      # Backend (optional)
+      # -------------------------------------------
+      - name: Backend install, build & test
+        run: |
+          if [ -d backend ] && [ -f backend/package.json ]; then
+            cd backend
+            npm install
+            npm run build --if-present
+            npm test --if-present
+            cd ..
+          else
+            echo "No backend folder found, skipping backend step"
+          fi
+
+      # -------------------------------------------
+      # Frontend install
+      # -------------------------------------------
+      - name: Frontend install
         run: |
           if [ -d frontend ] && [ -f frontend/package.json ]; then
             cd frontend
             npm install
+            cd ..
           elif [ -f package.json ]; then
             npm install
+          else
+            echo "No frontend package.json found"
           fi
 
-      - name: Build frontend
+      # -------------------------------------------
+      # Frontend build
+      # -------------------------------------------
+      - name: Frontend build
         run: |
           if [ -d frontend ] && [ -f frontend/package.json ]; then
             cd frontend
             npm run build
+            cd ..
           elif [ -f package.json ]; then
             npm run build
+          else
+            echo "No frontend build step"
           fi
 
-      # ---------- PREPARE PAGES ----------
-      - name: Prepare Pages directory
+      # -------------------------------------------
+      # Prepare deploy directory
+      # -------------------------------------------
+      - name: Prepare deploy folder
         run: |
-          mkdir -p pages
+          rm -rf deploy
+          mkdir deploy
+
           if [ -d frontend/dist ]; then
-            cp -r frontend/dist/* pages/
+            cp -r frontend/dist/* deploy/
           elif [ -d frontend/build ]; then
-            cp -r frontend/build/* pages/
+            cp -r frontend/build/* deploy/
           elif [ -d dist ]; then
-            cp -r dist/* pages/
+            cp -r dist/* deploy/
           elif [ -d build ]; then
-            cp -r build/* pages/
+            cp -r build/* deploy/
           else
             echo "❌ No frontend build output found"
             exit 1
           fi
 
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: pages
+      # -------------------------------------------
+      # Deploy to custom branch
+      # -------------------------------------------
+      - name: Deploy to deploy branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
+          git checkout --orphan deploy
+          git rm -rf .
+          cp -r deploy/* .
+          touch .nojekyll
 
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          git add .
+          git commit -m "Deploy site (auto)"
+          git push origin deploy --force
