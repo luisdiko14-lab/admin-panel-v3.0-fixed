@@ -1,4 +1,4 @@
-name: CI
+name: CI + GitHub Pages Deploy
 
 on:
   push:
@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: ["main"]
   workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
   build:
@@ -16,18 +21,16 @@ jobs:
         node-version: [18, 20]
 
     steps:
-      # Checkout repo
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Setup Node
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: npm
 
-      # Install root dependencies (if package.json exists)
+      # ---------- ROOT ----------
       - name: Install root dependencies
         run: |
           if [ -f package.json ]; then
@@ -35,49 +38,49 @@ jobs:
           fi
 
       # ---------- BACKEND ----------
-      - name: Install backend dependencies
+      - name: Backend install & build
         run: |
           if [ -d backend ] && [ -f backend/package.json ]; then
             cd backend
             npm install
-          fi
-
-      - name: Build backend
-        run: |
-          if [ -d backend ] && [ -f backend/package.json ]; then
-            cd backend
             npm run build --if-present
-          fi
-
-      - name: Test backend
-        run: |
-          if [ -d backend ] && [ -f backend/package.json ]; then
-            cd backend
             npm test --if-present
           fi
 
       # ---------- FRONTEND ----------
-      - name: Install frontend dependencies
+      - name: Frontend install
         run: |
           if [ -d frontend ] && [ -f frontend/package.json ]; then
             cd frontend
             npm install
           fi
 
-      - name: Build frontend
+      - name: Frontend build
         run: |
           if [ -d frontend ] && [ -f frontend/package.json ]; then
             cd frontend
-            npm run build --if-present
+            npm run build
           fi
 
-      - name: Test frontend
-        run: |
-          if [ -d frontend ] && [ -f frontend/package.json ]; then
-            cd frontend
-            npm test --if-present
-          fi
+      # ---------- UPLOAD ARTIFACT ----------
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: |
+            frontend/dist
+            frontend/build
+            dist
+            build
 
-      # ---------- DONE ----------
-      - name: CI finished
-        run: echo "✅ Frontend + Backend CI completed successfully"
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
