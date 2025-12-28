@@ -1,0 +1,112 @@
+# =====================================================
+# Custom Static Pages Deployment Workflow
+# Verified ✅ by Luis
+# Workflow made by Luis
+# License: MT License 2026
+# =====================================================
+
+name: Build & Deploy Custom Pages
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # -------------------------------
+      # Checkout main branch
+      # -------------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # -------------------------------
+      # Setup Node.js
+      # -------------------------------
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # -------------------------------
+      # Frontend install
+      # -------------------------------
+      - name: Install frontend dependencies
+        run: |
+          if [ -d frontend ] && [ -f frontend/package.json ]; then
+            cd frontend
+            npm install
+            cd ..
+          elif [ -f package.json ]; then
+            npm install
+          fi
+
+      # -------------------------------
+      # Frontend build
+      # -------------------------------
+      - name: Build frontend
+        run: |
+          if [ -d frontend ] && [ -f frontend/package.json ]; then
+            cd frontend
+            npm run build
+            cd ..
+          elif [ -f package.json ]; then
+            npm run build
+          else
+            echo "❌ No frontend build found"
+            exit 1
+          fi
+
+      # -------------------------------
+      # Prepare custom pages output
+      # -------------------------------
+      - name: Prepare custom pages
+        run: |
+          rm -rf custom-pages
+          mkdir custom-pages
+
+          if [ -d frontend/dist ]; then
+            cp -r frontend/dist/* custom-pages/
+          elif [ -d frontend/build ]; then
+            cp -r frontend/build/* custom-pages/
+          elif [ -d dist ]; then
+            cp -r dist/* custom-pages/
+          elif [ -d build ]; then
+            cp -r build/* custom-pages/
+          else
+            echo "❌ No static output folder found"
+            exit 1
+          fi
+
+          # -------------------------------
+          # Add credits
+          # -------------------------------
+          echo "Verified ✅ by Luis" > custom-pages/CREDITS.txt
+          echo "Workflow made by Luis" >> custom-pages/CREDITS.txt
+          echo "MT License 2026" >> custom-pages/CREDITS.txt
+
+          echo "✔ Verified ✅ by Luis 2026 MT License"
+
+      # -------------------------------
+      # Deploy to custom branch
+      # -------------------------------
+      - name: Deploy custom pages branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git checkout --orphan deploy
+          git rm -rf .
+          cp -r custom-pages/* .
+          touch .nojekyll
+
+          git add .
+          git commit -m "Custom pages deploy (Verified by Luis)"
+          git push origin deploy --force
