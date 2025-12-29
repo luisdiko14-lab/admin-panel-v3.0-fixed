@@ -1,0 +1,167 @@
+# ==========================================================
+# Ultimate Deployment Workflow
+# Verified ✅ by Luis
+# Workflow made by ChatGPT
+# License: MT License 2026
+# ==========================================================
+
+name: Ultimate Secure Deploy
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: deploy-main
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      # --------------------------------------------------
+      # START: Loading bar (visual only, clean logs)
+      # --------------------------------------------------
+      - name: Initializing deployment
+        run: |
+          echo "🚀 Starting deployment pipeline..."
+          for i in 10 25 40 55 70 85 100; do
+            echo "⏳ Loading... $i%"
+            sleep 0.3
+          done
+          echo "✅ System ready"
+
+      # --------------------------------------------------
+      # Checkout
+      # --------------------------------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      # --------------------------------------------------
+      # Setup Node.js (fast + cached)
+      # --------------------------------------------------
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # --------------------------------------------------
+      # Security info
+      # --------------------------------------------------
+      - name: Security & environment info
+        run: |
+          echo "🔐 Runner OS: $(uname -a)"
+          echo "🔐 Node version: $(node -v)"
+          echo "🔐 NPM version: $(npm -v)"
+
+      # --------------------------------------------------
+      # Install dependencies (auto-detect)
+      # --------------------------------------------------
+      - name: Install dependencies
+        run: |
+          if [ -d frontend ] && [ -f frontend/package.json ]; then
+            echo "📦 Installing frontend dependencies"
+            cd frontend
+            npm ci || npm install
+            cd ..
+          elif [ -f package.json ]; then
+            echo "📦 Installing root dependencies"
+            npm ci || npm install
+          else
+            echo "⚠️ No package.json found"
+          fi
+
+      # --------------------------------------------------
+      # Build project
+      # --------------------------------------------------
+      - name: Build project
+        run: |
+          if [ -d frontend ] && [ -f frontend/package.json ]; then
+            echo "🏗️ Building frontend"
+            cd frontend
+            npm run build
+            cd ..
+          elif [ -f package.json ]; then
+            echo "🏗️ Building root project"
+            npm run build
+          else
+            echo "❌ No build step found"
+            exit 1
+          fi
+
+      # --------------------------------------------------
+      # Prepare web deploy output
+      # --------------------------------------------------
+      - name: Prepare web deployment
+        run: |
+          echo "🌍 Preparing web output"
+          rm -rf web
+          mkdir web
+
+          if [ -d frontend/dist ]; then
+            cp -r frontend/dist/* web/
+          elif [ -d frontend/build ]; then
+            cp -r frontend/build/* web/
+          elif [ -d dist ]; then
+            cp -r dist/* web/
+          elif [ -d build ]; then
+            cp -r build/* web/
+          else
+            echo "❌ No static output found"
+            exit 1
+          fi
+
+      # --------------------------------------------------
+      # Credits + License injection
+      # --------------------------------------------------
+      - name: Add credits & license
+        run: |
+          echo "🧾 Adding credits"
+          echo "Verified ✅ by Luis" > web/CREDITS.txt
+          echo "Workflow made by ChatGPT" >> web/CREDITS.txt
+          echo "MT License 2026" >> web/CREDITS.txt
+
+          echo "/*" > web/LICENSE.txt
+          echo " MT License 2026" >> web/LICENSE.txt
+          echo " Verified ✅ by Luis" >> web/LICENSE.txt
+          echo " Workflow made by ChatGPT" >> web/LICENSE.txt
+          echo "*/" >> web/LICENSE.txt
+
+          echo "✔ Verified ✅ by Luis | MT License 2026"
+
+      # --------------------------------------------------
+      # Deploy to custom branch (clean & secure)
+      # --------------------------------------------------
+      - name: Deploy to web branch
+        run: |
+          echo "🚀 Deploying to web branch"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git checkout --orphan deploy
+          git rm -rf .
+          cp -r web/* .
+          touch .nojekyll
+
+          git add .
+          git commit -m "🚀 Web deploy | Verified by Luis | MT License 2026"
+          git push origin deploy --force
+
+      # --------------------------------------------------
+      # END
+      # --------------------------------------------------
+      - name: Deployment complete
+        run: |
+          echo "✅ Deployment finished successfully"
+          echo "🌍 Branch: deploy"
+          echo "🔒 Secure | ⚡ Fast | 🧠 Automated"
