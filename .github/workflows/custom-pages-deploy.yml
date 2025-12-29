@@ -19,14 +19,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
-    # ✅ REAL ENVIRONMENT + REAL URL
     environment:
       name: custom-pages
       url: https://luisdiko14-lab.github.io/admin-panel-v3.0-fixed/
 
     steps:
       # --------------------------------------------------
-      # Loading bar (0% -> 100%, +5% per second)
+      # Loading bar (0% → 100%)
       # --------------------------------------------------
       - name: Initializing system
         run: |
@@ -38,7 +37,34 @@ jobs:
           echo "✅ System initialized"
 
       # --------------------------------------------------
-      # Checkout (FULL history)
+      # System Specs (CPU / RAM / GPU / OS)
+      # --------------------------------------------------
+      - name: System specifications
+        run: |
+          echo "🖥️ SYSTEM SPECS"
+          echo "----------------------------------"
+          echo "🧠 CPU:"
+          lscpu | grep -E 'Model name|CPU\(s\)'
+
+          echo ""
+          echo "💾 RAM:"
+          free -h
+
+          echo ""
+          echo "🎮 GPU (if available):"
+          if command -v lspci &> /dev/null; then
+            lspci | grep -i -E 'vga|3d|display' || echo "No GPU detected"
+          else
+            echo "GPU info tool not available"
+          fi
+
+          echo ""
+          echo "🧩 OS:"
+          uname -a
+          echo "----------------------------------"
+
+      # --------------------------------------------------
+      # Checkout repository
       # --------------------------------------------------
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -60,15 +86,15 @@ jobs:
       - name: Install dependencies
         run: |
           if [ -d frontend ] && [ -f frontend/package.json ]; then
-            echo "📦 Installing frontend deps"
+            echo "📦 Installing frontend dependencies"
             cd frontend
             npm install
             cd ..
           elif [ -f package.json ]; then
-            echo "📦 Installing root deps"
+            echo "📦 Installing root dependencies"
             npm install
           else
-            echo "⚠️ No package.json found"
+            echo "⚠️ No package.json found, skipping install"
           fi
 
       # --------------------------------------------------
@@ -91,18 +117,20 @@ jobs:
           fi
 
       # --------------------------------------------------
-      # Prepare web output
+      # Prepare static web output
       # --------------------------------------------------
       - name: Prepare web output
         run: |
           echo "🔍 Detecting build output"
           rm -rf web
-          mkdir web
+          mkdir -p web
 
           if [ -d frontend/dist ]; then
             cp -r frontend/dist/* web/
           elif [ -d frontend/build ]; then
             cp -r frontend/build/* web/
+          elif [ -d dist/public ]; then
+            cp -r dist/public/* web/
           elif [ -d dist ]; then
             cp -r dist/* web/
           elif [ -d build ]; then
@@ -111,6 +139,9 @@ jobs:
             echo "❌ No static build output found"
             exit 1
           fi
+
+          echo "📦 Web files:"
+          ls -la web
 
       # --------------------------------------------------
       # Credits & License
@@ -145,7 +176,7 @@ jobs:
           fi
 
           find . -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
-          cp -r web/* .
+          cp -r web/. .
           touch .nojekyll
 
           git add .
@@ -157,5 +188,5 @@ jobs:
       # --------------------------------------------------
       - name: Done
         run: |
-          echo "✅ Deployment finished"
-          echo "🌍 URL: https://luisdiko14-lab.github.io/admin-panel-v3.0-fixed/"
+          echo "✅ Deployment complete"
+          echo "🌍 https://luisdiko14-lab.github.io/admin-panel-v3.0-fixed/"
