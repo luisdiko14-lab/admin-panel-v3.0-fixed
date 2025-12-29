@@ -1,11 +1,10 @@
 # ==========================================================
-# Ultimate Deployment Workflow
+# Custom Pages Deployment Workflow
 # Verified ✅ by Luis
-# Workflow made by ChatGPT
 # License: MT License 2026
 # ==========================================================
 
-name: Ultimate Secure Deploy
+name: Custom Pages Deploy
 
 on:
   push:
@@ -16,34 +15,41 @@ permissions:
   contents: write
 
 concurrency:
-  group: deploy-main
+  group: custom-pages-deploy
   cancel-in-progress: true
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
+
+    # 👇 THIS CREATES THE ENVIRONMENT
+    environment:
+      name: custom-pages
+      url: https://example.com/custom-pages
 
     steps:
       # --------------------------------------------------
-      # START: Loading bar (visual only, clean logs)
+      # Loading bar (0% -> 100%, +5% every second)
       # --------------------------------------------------
-      - name: Initializing deployment
+      - name: Initializing system
         run: |
-          echo "🚀 Starting deployment pipeline..."
-          for i in 10 25 40 55 70 85 100; do
-            echo "⏳ Loading... $i%"
-            sleep 0.3
+          echo "🚀 Initializing Custom Pages Deployment"
+          progress=0
+          while [ $progress -le 100 ]; do
+            echo "⏳ Loading... ${progress}%"
+            sleep 1
+            progress=$((progress + 5))
           done
-          echo "✅ System ready"
+          echo "✅ System initialized"
 
       # --------------------------------------------------
-      # Checkout
+      # Checkout repository (FULL history, required)
       # --------------------------------------------------
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          fetch-depth: 0
 
       # --------------------------------------------------
       # Setup Node.js (fast + cached)
@@ -53,15 +59,6 @@ jobs:
         with:
           node-version: 20
           cache: npm
-
-      # --------------------------------------------------
-      # Security info
-      # --------------------------------------------------
-      - name: Security & environment info
-        run: |
-          echo "🔐 Runner OS: $(uname -a)"
-          echo "🔐 Node version: $(node -v)"
-          echo "🔐 NPM version: $(npm -v)"
 
       # --------------------------------------------------
       # Install dependencies (auto-detect)
@@ -99,11 +96,11 @@ jobs:
           fi
 
       # --------------------------------------------------
-      # Prepare web deploy output
+      # Prepare static web output
       # --------------------------------------------------
-      - name: Prepare web deployment
+      - name: Prepare custom pages output
         run: |
-          echo "🌍 Preparing web output"
+          echo "🌍 Preparing custom pages output"
           rm -rf web
           mkdir web
 
@@ -121,47 +118,53 @@ jobs:
           fi
 
       # --------------------------------------------------
-      # Credits + License injection
+      # Credits & License (echo-based)
       # --------------------------------------------------
       - name: Add credits & license
         run: |
-          echo "🧾 Adding credits"
           echo "Verified ✅ by Luis" > web/CREDITS.txt
           echo "Workflow made by ChatGPT" >> web/CREDITS.txt
           echo "MT License 2026" >> web/CREDITS.txt
 
-          echo "/*" > web/LICENSE.txt
-          echo " MT License 2026" >> web/LICENSE.txt
-          echo " Verified ✅ by Luis" >> web/LICENSE.txt
-          echo " Workflow made by ChatGPT" >> web/LICENSE.txt
-          echo "*/" >> web/LICENSE.txt
+          echo "MT License 2026" > web/LICENSE.txt
+          echo "Verified ✅ by Luis" >> web/LICENSE.txt
+          echo "Workflow made by ChatGPT" >> web/LICENSE.txt
 
           echo "✔ Verified ✅ by Luis | MT License 2026"
 
       # --------------------------------------------------
-      # Deploy to custom branch (clean & secure)
+      # Deploy to deploy branch (SAFE METHOD)
       # --------------------------------------------------
-      - name: Deploy to web branch
+      - name: Deploy to custom pages branch
         run: |
-          echo "🚀 Deploying to web branch"
+          echo "🚀 Deploying to deploy branch"
 
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-          git checkout --orphan deploy
-          git rm -rf .
+          git fetch origin
+
+          if git show-ref --quiet refs/remotes/origin/deploy; then
+            git checkout deploy
+            git pull origin deploy
+          else
+            git checkout -b deploy
+          fi
+
+          find . -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
+
           cp -r web/* .
           touch .nojekyll
 
           git add .
-          git commit -m "🚀 Web deploy | Verified by Luis | MT License 2026"
+          git commit -m "🚀 Custom Pages Deploy | Verified by Luis | MT License 2026" || echo "No changes to commit"
           git push origin deploy --force
 
       # --------------------------------------------------
-      # END
+      # Done
       # --------------------------------------------------
-      - name: Deployment complete
+      - name: Deployment finished
         run: |
-          echo "✅ Deployment finished successfully"
-          echo "🌍 Branch: deploy"
-          echo "🔒 Secure | ⚡ Fast | 🧠 Automated"
+          echo "✅ Deployment completed successfully"
+          echo "🌍 Environment: custom-pages"
+          echo "📦 Branch: deploy"
