@@ -14,37 +14,31 @@ on:
 permissions:
   contents: write
 
-concurrency:
-  group: custom-pages-deploy
-  cancel-in-progress: true
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
-    # 👇 THIS CREATES THE ENVIRONMENT
+    # ✅ REAL ENVIRONMENT + REAL URL
     environment:
       name: custom-pages
-      url: https://example.com/custom-pages
+      url: https://luisdiko14-lab.github.io/admin-panel-v3.0-fixed/
 
     steps:
       # --------------------------------------------------
-      # Loading bar (0% -> 100%, +5% every second)
+      # Loading bar (0% -> 100%, +5% per second)
       # --------------------------------------------------
       - name: Initializing system
         run: |
           echo "🚀 Initializing Custom Pages Deployment"
-          progress=0
-          while [ $progress -le 100 ]; do
-            echo "⏳ Loading... ${progress}%"
+          for p in $(seq 0 5 100); do
+            echo "⏳ Loading... ${p}%"
             sleep 1
-            progress=$((progress + 5))
           done
           echo "✅ System initialized"
 
       # --------------------------------------------------
-      # Checkout repository (FULL history, required)
+      # Checkout (FULL history)
       # --------------------------------------------------
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -52,7 +46,7 @@ jobs:
           fetch-depth: 0
 
       # --------------------------------------------------
-      # Setup Node.js (fast + cached)
+      # Setup Node.js
       # --------------------------------------------------
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -61,18 +55,18 @@ jobs:
           cache: npm
 
       # --------------------------------------------------
-      # Install dependencies (auto-detect)
+      # Install dependencies
       # --------------------------------------------------
       - name: Install dependencies
         run: |
           if [ -d frontend ] && [ -f frontend/package.json ]; then
-            echo "📦 Installing frontend dependencies"
+            echo "📦 Installing frontend deps"
             cd frontend
-            npm ci || npm install
+            npm install
             cd ..
           elif [ -f package.json ]; then
-            echo "📦 Installing root dependencies"
-            npm ci || npm install
+            echo "📦 Installing root deps"
+            npm install
           else
             echo "⚠️ No package.json found"
           fi
@@ -82,6 +76,7 @@ jobs:
       # --------------------------------------------------
       - name: Build project
         run: |
+          set -e
           if [ -d frontend ] && [ -f frontend/package.json ]; then
             echo "🏗️ Building frontend"
             cd frontend
@@ -91,16 +86,16 @@ jobs:
             echo "🏗️ Building root project"
             npm run build
           else
-            echo "❌ No build step found"
+            echo "❌ Nothing to build"
             exit 1
           fi
 
       # --------------------------------------------------
-      # Prepare static web output
+      # Prepare web output
       # --------------------------------------------------
-      - name: Prepare custom pages output
+      - name: Prepare web output
         run: |
-          echo "🌍 Preparing custom pages output"
+          echo "🔍 Detecting build output"
           rm -rf web
           mkdir web
 
@@ -113,12 +108,12 @@ jobs:
           elif [ -d build ]; then
             cp -r build/* web/
           else
-            echo "❌ No static output found"
+            echo "❌ No static build output found"
             exit 1
           fi
 
       # --------------------------------------------------
-      # Credits & License (echo-based)
+      # Credits & License
       # --------------------------------------------------
       - name: Add credits & license
         run: |
@@ -130,12 +125,10 @@ jobs:
           echo "Verified ✅ by Luis" >> web/LICENSE.txt
           echo "Workflow made by ChatGPT" >> web/LICENSE.txt
 
-          echo "✔ Verified ✅ by Luis | MT License 2026"
-
       # --------------------------------------------------
-      # Deploy to deploy branch (SAFE METHOD)
+      # Deploy to deploy branch
       # --------------------------------------------------
-      - name: Deploy to custom pages branch
+      - name: Deploy to deploy branch
         run: |
           echo "🚀 Deploying to deploy branch"
 
@@ -152,19 +145,17 @@ jobs:
           fi
 
           find . -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
-
           cp -r web/* .
           touch .nojekyll
 
           git add .
-          git commit -m "🚀 Custom Pages Deploy | Verified by Luis | MT License 2026" || echo "No changes to commit"
+          git commit -m "🚀 Custom Pages Deploy | Verified by Luis | MT License 2026" || echo "No changes"
           git push origin deploy --force
 
       # --------------------------------------------------
       # Done
       # --------------------------------------------------
-      - name: Deployment finished
+      - name: Done
         run: |
-          echo "✅ Deployment completed successfully"
-          echo "🌍 Environment: custom-pages"
-          echo "📦 Branch: deploy"
+          echo "✅ Deployment finished"
+          echo "🌍 URL: https://luisdiko14-lab.github.io/admin-panel-v3.0-fixed/"
