@@ -1,5 +1,51 @@
 // Console logging utilities for DiscordHub Pro
+logs.success("Test success log");
+logs.warn("Test warning log");
+logs.info("Test info log");
+logs.debug("Test debug log");
 
+logs.auth.login("Discord", "testuser");
+logs.auth.logout("testuser");
+logs.auth.register("Google", "test@example.com");
+logs.auth.failed("Twitter", "Invalid credentials");
+logs.auth.validated("testuser", "test@example.com");
+logs.auth.guilds(5);
+
+logs.api.request("GET", "/api/data", 200);
+logs.api.response("/api/data", { message: "Success" });
+logs.api.error("/api/data", "Not found");
+
+logs.discord.ready("TestBot");
+logs.discord.command("!test", "testuser");
+logs.discord.error("Something went wrong");
+logs.discord.guildJoin("Test Guild");
+
+logs.db.query("SELECT * FROM users");
+logs.db.connected("MongoDB");
+logs.db.error("Connection refused");
+logs.db.saved("user");
+
+logs.routes.init("Home");
+logs.routes.hit("GET", "/");
+logs.routes.redirect("/", "/home");
+
+logs.validation.start("User");
+logs.validation.passed("Email format");
+logs.validation.failed("Password length", "Too short");
+
+logs.session.created("session123");
+logs.session.destroyed("session123");
+logs.session.active(10);
+
+const startTime = logs.perf.start("Data fetch");
+setTimeout(() => {
+  logs.perf.end("Data fetch", startTime);
+}, 100);
+
+logs.table([{ name: "John", age: 30 }, { name: "Jane", age: 25 }]);
+
+logs.separator();
+logs.banner("Test Banner");
 // Color codes for terminal output
 const colors = {
   reset: '\x1b[0m',
