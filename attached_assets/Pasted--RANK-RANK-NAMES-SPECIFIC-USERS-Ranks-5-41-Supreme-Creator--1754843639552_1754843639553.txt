@@ -1,7 +1,7 @@
 // RANK, RANK NAMES & SPECIFIC USERS
 Ranks = {
     {5, "41 | Supreme Creator",                };
-    {4.999, "40 | Supreme Real Co-Creator", {"e",0}, {} };
+    {4.999, "40 | Supreme Real Co-Creator", {"Luisdiko87",0}, {} };
     {4.9875, "39 | Supreme Founder of Development Creation", {"e",0}, {} };
     {4.9975, "38.5 | Supreme Head of Foundation", {"e",0}, {} };
     {4.98, "38 | Supreme King of Kings", {"e",0}, {} };
